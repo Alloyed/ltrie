@@ -31,6 +31,7 @@ describe("Persistent Vectors", function()
 			assert.are.equal(tbl[i], vec:get(i))
 		end
 	end)
+
 	it("implements assoc()", function()
 		local l = vec:len()
 		local mergeIn = {{l, "TOP"}}
@@ -45,6 +46,19 @@ describe("Persistent Vectors", function()
 
 		for i, v in ipairs(tbl) do
 			assert.are.equal(tbl[i], vec:get(i))
+		end
+	end)
+
+	local subvec = require 'subvec'
+	it("can be subvec'd", function()
+		local sv = subvec.new(vec, 1, 20)
+		for i=1, 20 do
+			assert.is.equal(sv:get(i), vec:get(i))
+		end
+
+		sv = subvec.new(vec, 21, 40)
+		for i=1, 20 do
+			assert.is.equal(sv:get(i), vec:get(i + 20))
 		end
 	end)
 end)

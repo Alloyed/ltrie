@@ -32,6 +32,15 @@ local function Vec(data)
 	return setmetatable(data, mt)
 end
 
+local function VecW(self, data)
+	for k, v in pairs(self) do
+		if not data[k] then
+			data[k] = v
+		end
+	end
+	return Vec(data)
+end
+
 local EMPTY = Vec {
 	count = 0,
 	shift = BITS,
@@ -41,7 +50,7 @@ local EMPTY = Vec {
 
 --- Creates a vector containing the elements provided by the given iterator.
 -- @param ... the iterator
--- @usage Vector.from(ipairs {1, 2, 3, 4, 5})
+-- @usage Vector.from(ipairs {1, 2, 3, 4})
 function Vector.from(...)
 	local r = EMPTY
 	for _, v in ... do
@@ -52,7 +61,7 @@ end
 
 --- Creates a vector containing the arguments.
 -- @param ... the arguments to include
--- @usage Vector.of(1, 2, 3, 4, 5)
+-- @usage Vector.of(1, 2, 3, 4)
 function Vector.of(...)
 	local r =  EMPTY
 	for i=1, select('#', ...) do
@@ -112,8 +121,7 @@ function Vector:get(idx)
 	if node == OOB then return nil end
 	return node[mask(idx) + 1] -- +1
 end
-mt.__index = Vector.get
-
+-- mt.__index = Vector.get
 
 local function iter(param, state)
 	local vec, idx = param, state
@@ -166,12 +174,10 @@ function Vector:conj(val)
 	if self.count - tailoff(self) < WIDTH then
 		newTail = copy(self.tail)
 		table.insert(newTail, val)
-		return Vec {
+		return VecW(self, {
 			count = self.count + 1,
-			shift = self.shift,
-			root = self.root,
 			tail = newTail
-		}
+		})
 	end
 
 	local newRoot
@@ -179,21 +185,21 @@ function Vector:conj(val)
 	local newShift = self.shift
 
 	-- will root overflow?
-	if b.rshift(self.count, 5) > b.lshift(1, self.shift) then
+	if b.rshift(self.count, BITS) > b.lshift(1, self.shift) then
 		newRoot = {}
 		newRoot[1] = self.root
 		newRoot[2] = newPath(self.shift, tailNode)
-		newShift = self.shift + 5
+		newShift = self.shift + BITS
 	else
 		newRoot = pushTail(self, self.shift, self.root, tailNode)
 	end
 
-	return Vec {
+	return VecW(self, {
 		count = self.count + 1,
 		shift = newShift,
 		root = newRoot,
 		tail = {val}
-	}
+	})
 end
 
 local function doAssoc(level, node, idx, val)
@@ -221,18 +227,67 @@ function Vector:assoc(idx, val)
 	if idx >= tailoff(self) then
 		local newTail = copy(self.tail)
 		newTail[mask(idx) + 1] = val -- +1
-		return Vec {
-			count = self.count,
-			shift = self.shift,
-			root = self.root,
+		return VecW(self, {
 			tail = newTail
-		}
+		})
 	end
-	return Vec {
-		count = self.count,
-		shift = self.shift,
+	return VecW(self, {
 		root = doAssoc(self.shift, self.root, idx, val),
-		tail = self.tail
+	})
+end
+
+local function popTail(level, node)
+	local subidx = mask(b.rshift(self.count - 2, level)) + 1  -- +1
+	if level > BITS then
+		local newChild = popTail(level - BITS, node[subidx])
+		if newChild == nil and subidx == 1 then
+			return nil
+		else
+			local r = copy(node)
+			r[subidx] = newChild
+			return r
+		end
+	elseif subidx == 1 then
+		return nil
+	else
+		local r = copy(node)
+		r[subidx] = nil
+		return r
+	end
+end
+
+--- Returns a new vector with the last element removed. Yes, I know
+-- that's not the traditional definition of pop(), but it's the name clojure
+-- uses.
+function Vector:pop()
+	if self.count == 0 then
+		return error("Can't pop from empty vector")
+	elseif self.count == 1 then
+		return EMPTY
+	elseif self.count - tailoff(self) > 1 then
+		local newTail = copy(self.tail)
+		table.remove(newTail)
+		return VecW(self, {
+			count = self.count - 1,
+			tail  = newTail
+		})
+	end
+
+	local newTail = arrayFor(self, self.count - 2)
+	local newRoot = popTail(shift, root)
+	local newShift = shift
+	if newRoot == nil then
+		newRoot = EMPTY_NODE
+	elseif self.shift > BITS and newRoot[2] == nil then
+		newRoot = newRoot[1]
+		newShift = newShift - 1
+	end
+
+	return Vec {
+		count = self.count - 1,
+		shift = newShift,
+		root  = newRoot,
+		tail  = newTail
 	}
 end
 

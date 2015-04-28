@@ -49,16 +49,48 @@ describe("Persistent Vectors", function()
 		end
 	end)
 
-	local subvec = require 'subvec'
-	it("can be subvec'd", function()
-		local sv = subvec.new(vec, 1, 20)
+	it("implements pop()", function()
+	end)
+end)
+
+describe("subvec", function()
+	local Vector = require 'vector'
+	local Subvec = require 'subvec'
+
+	local vec = Vector.of()
+	for i=1, 50 do
+		vec = vec:conj(i)
+	end
+
+	it("implements get()", function()
+		local sv = Subvec.new(vec, 1, 20)
+		assert.is.equal(sv:len(), 20)
 		for i=1, 20 do
 			assert.is.equal(sv:get(i), vec:get(i))
 		end
 
-		sv = subvec.new(vec, 21, 40)
+		sv = Subvec.new(vec, 21, 40)
 		for i=1, 20 do
 			assert.is.equal(sv:get(i), vec:get(i + 20))
 		end
+	end)
+
+	it("implements conj() and assoc()", function()
+		local sv = Subvec.new(vec, 1, 5)
+
+		sv = sv:conj('a')
+		assert.is.equal(sv:get(6), 'a')
+		assert.is_not.equal(vec:get(6), 'a')
+
+		sv = sv:assoc(2, 'b')
+		assert.is.equal(sv:get(2), 'b')
+		assert.is_not.equal(vec:get(2), 'b')
+	end)
+	it("implements pop()", function()
+		local sv = Subvec.new(vec, 1, 5)
+		assert.is.equal(sv:len(), 5)
+
+		sv = sv:pop()
+		assert.is.equal(sv:len(), 4)
 	end)
 end)

@@ -1,24 +1,30 @@
-pending('List', function()
---local List = require 'list'
-	it('of provides initial values', function()
-		local v = List.new({'a', 'b', 'c'})
-		assert.are.equal('a', v:get(1))
-		assert.are.equal('b', v:get(2))
-		assert.are.equal('c', v:get(3))
-	end)
+describe("list", function()
+	local fun  = require 'fun'
+	local list = require 'list'
 
-	it('of provides initial values', function()
-		local v = List.of('a', 'b', 'c')
-		assert.are.equal('a', v:get(1))
-		assert.are.equal('b', v:get(2))
-		assert.are.equal('c', v:get(3))
+	it("implements (from)", function()
+		assert.are.same(
+			list.from{1, 2, 3},
+			list.cons(1, list.cons(2, list.cons(3, nil))))
 	end)
-
-	it('coerces numeric string keys to indexes', function()
-		local v = List.of(1, 2, 3, -1);
-		assert.are.equal(1, v:get('1'))
-		assert.are.equal(2, v:get('2'))
-		assert.are.equal(3, v:get('3'))
-		assert.are.equal(4, v:set('4', 4):get('3'))
+	it("implements (get)", function()
+		assert.is.equal(list.get(list.from{6, 7, 8}, 2), 7)
+	end)
+	it("implements (conj)", function()
+		assert.are.same(
+			fun.totable(list.conj(list.from{2, 3, 4}, 1)),
+			{1, 2, 3, 4})
+	end)
+	it("implements (assoc)", function()
+		local old = list.from{1, 2, 3, 4}
+		assert.are.same(
+			fun.totable(list.assoc(old, 1, 10)),
+			{10, 2, 3, 4})
+		assert.are.same(
+			fun.totable(list.assoc(old, 3, 10)),
+			{1, 2, 10, 4})
+		assert.are.same(
+			fun.totable(old),
+			{1, 2, 3, 4})
 	end)
 end)

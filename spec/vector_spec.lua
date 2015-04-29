@@ -75,6 +75,14 @@ describe("subvec", function()
 		end
 	end)
 
+	it("implements ipairs()", function()
+		local sv = Subvec.new(vec, 11, 20)
+		assert.is.equal(sv:len(), 10)
+		for i, v in sv:ipairs() do
+			assert.is.equal(v, vec:get(i+10))
+		end
+	end)
+
 	it("implements conj() and assoc()", function()
 		local sv = Subvec.new(vec, 1, 5)
 

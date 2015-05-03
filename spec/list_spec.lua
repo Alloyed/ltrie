@@ -1,6 +1,6 @@
 describe("list", function()
 	local fun  = require 'fun'
-	local list = require 'list'
+	local list = require 'ltrie.list'
 
 	it("implements (from)", function()
 		assert.are.same(

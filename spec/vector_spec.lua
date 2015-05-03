@@ -1,5 +1,5 @@
 describe("Persistent Vectors", function()
-	local Vector = require 'vector'
+	local Vector = require 'ltrie.vector'
 	local tbl = {}
 	for i=1, 2048 do
 		table.insert(tbl, 2048 - i)
@@ -54,8 +54,8 @@ describe("Persistent Vectors", function()
 end)
 
 describe("subvec", function()
-	local Vector = require 'vector'
-	local Subvec = require 'subvec'
+	local Vector = require 'ltrie.vector'
+	local Subvec = require 'ltrie.subvec'
 
 	local vec = Vector.of()
 	for i=1, 50 do

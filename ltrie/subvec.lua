@@ -1,6 +1,6 @@
 --- A slice of a vector.
 -- @module Subvec
-local Vector = require 'vector'
+local Vector = require 'ltrie.vector'
 local Subvec = {}
 
 local mt = {__index = Subvec}

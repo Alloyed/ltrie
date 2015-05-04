@@ -3,7 +3,11 @@ describe("arraymap", function()
 	it("implements from()/pairs()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
-		assert.are.same(cmp, new.table)
+		for k, v in new:pairs() do
+			assert.are.equal(v, cmp[k])
+		end
+		cmp.a = 'b'
+		assert.are_not.equal(new:get('a'), cmp.a)
 	end)
 	it("Implements of()/get()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }

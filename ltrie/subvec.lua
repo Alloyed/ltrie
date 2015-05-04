@@ -30,6 +30,8 @@ function Subvec:get(idx)
 	return self.vec:get(subidx)
 end
 
+Subvec.ipairs = Vector.ipairs
+
 function Subvec:assoc(idx, val)
 	idx = idx - 1 -- s[1] == v[start]
 	local subidx = idx + self.vecStart

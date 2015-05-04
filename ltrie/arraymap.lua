@@ -33,7 +33,9 @@ end
 
 --- Map from table
 function AMap.wrap_table(tbl)
-	return ctor { table = tbl, count = #tbl }
+	local i = 0
+	for _ in pairs(tbl) do i = i + 1 end
+	return ctor { table = tbl, count = i }
 end
 
 function AMap:len()

@@ -19,17 +19,22 @@ describe("arraymap", function()
 	it("Implements assoc()/len()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
+
+		assert.is.equal(3, new:len())
 		cmp.d = "JEFF"
 		new = new:assoc('d', "JEFF")
-		assert.is.equal(#cmp, new:len())
+		assert.is.equal(4, new:len())
+
 		assert.are.same(cmp, new.table)
 	end)
 	it("Implements dissoc()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
-		cmp.d = "JEFF"
-		new = new:assoc('d', "JEFF")
-		assert.is.equal(#cmp, new:len())
+
+		cmp.c = nil
+		new = new:dissoc('c')
+
+		assert.is.equal(2, new:len())
 		assert.are.same(cmp, new.table)
 	end)
 end)

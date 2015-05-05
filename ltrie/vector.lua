@@ -6,7 +6,7 @@
 -- To match Lua's index-by-one semantics I had to introduce an offset or two.
 -- Every line I've done that on is marked with a +1 or -1 comment.
 -- @module Vector
---
+
 local function try(...)
 	local ok, err = pcall(...)
 	if not ok then return nil end

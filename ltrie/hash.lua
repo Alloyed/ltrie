@@ -3,13 +3,20 @@
 -- To match Lua's index-by-one semantics I had to introduce an offset or two.
 -- Every line I've done that on is marked with a +1 or -1 comment.
 
+local function try(...)
+	local ok, err = pcall(...)
+	if not ok then return nil end
+	return err
+end
 local fun = require 'fun'
+local b = bit32 or try(require, 'bit') or error("No bitop lib found")
+local hashcode = require 'hashcode'.hashcode
 
 local Hash = {}
 local mt = { __index = Hash }
 
 local function TODO()
-	return error(2, "TODO")
+	return error("TODO", 2)
 end
 
 local function Hmap(data)
@@ -32,6 +39,7 @@ function Hash.from(...)
 	fun.each(function (k, v)
 		r = r:assoc(k, v)
 	end, ...)
+	return r
 end
 
 function Hash.of(...)
@@ -59,10 +67,23 @@ local function mask(hash, shift)
 	return b.lshift(1, b.band(b.rshift(hash, shift), MASK))
 end
 
-local function popCount() error "TODO" end
+-- popcount for 32bit integers {{{
+local m1  = 0x55555555
+local m2  = 0x33333333
+local m4  = 0x0f0f0f0f
+local h01 = 0x01010101
+local function popCount(x)
+	x = x - b.band(b.rshift(x, 1), m1)
+	x = b.band(x, m2) + b.band(b.rshift(x, 2), m2)
+	x = b.band(x + b.rshift(x, 4), m4)
+	x = x + b.rshift(x, 8)
+	x = x + b.rshift(x, 16)
+	return b.band(x, 0x7f)
+end
+-- }}}
 
 local function idxFor(bitmap, bit)
-	return popCount(b.band(bitmap, bit - 1)) + 1 -- +1
+	return popCount(b.band(bitmap, bit - 1)) + 1
 end
 
 local Node = {} -- {{{
@@ -84,30 +105,79 @@ function Node.create(shift, leaf, hash, key, val)
 	}:assoc (shift, hash, key, val)
 end
 
+local function copy(tbl)
+	local t = {}
+	for k, v in pairs(tbl) do
+		t[k] = v
+	end
+	return t
+end
+
 local LeafC
 function Node:assoc(shift, hash, key, val)
 	local bit = mask(hash, shift)
-	local idx = index(bit)
-	if b.band(bitmap, bit) ~= 0 then
+	local idx = idxFor(self.bitmap, bit)
+	if b.band(self.bitmap, bit) ~= 0 then -- collision
 		local n = nodes[idx]:assoc(shift + BITS, hash, key, val)
 		if n == nodes[idx] then
 			return self
 		else
-			local newNodes = copy(nodes)
+			local newNodes = copy(self.nodes)
 			newNodes[idx] = n
-			return NodeC {bitmap = bitmap, nodes = newNodes, shift = shift}
+			return NodeC {
+				bitmap = self.bitmap,
+				nodes  = newNodes,
+				shift  = shift
+			}
 		end
 	else
 		newNodes = copy(self.nodes)
+		-- Shift forward old nodes
+		for i=#self.nodes, idx, -1 do
+			newNodes[i+1] = newNodes[i]
+		end
 		newNodes[idx] = LeafC(hash, key, val)
 		return NodeC {
-			bitmap = b.bor(bitmap, bit), nodes = newNodes, shift = shift
+			bitmap = b.bor(self.bitmap, bit),
+			nodes  = newNodes,
+			shift  = shift
 		}
 	end
 end
 
-function Node:without() error() end
-function Node:find() error() end
+function Node:without() TODO() end
+
+function Node:find(hash, key)
+	local bit = mask(hash, self.shift)
+	if b.band(self.bitmap, bit) ~= 0 then
+		local idx = idxFor(self.bitmap, bit)
+		local node = self.nodes[idx]
+		return node:find(hash, key)
+	end
+	return nil
+end
+
+local function node_iter(self, state)
+	if not state.state then
+		local leaf
+		state.it, leaf = next(self.nodes, state.it)
+
+		if leaf == nil then return nil end
+		state.gen, state.param, state.state = leaf:iter()
+	end
+
+	local inner_state, k, v = state.gen(state.param, state.state)
+	state.state = inner_state
+	if inner_state == nil then
+		return nested_iter(self, inner_state)
+	end
+
+	return state, k, v
+end
+
+function Node:iter()
+	return node_iter, self, {it = nil}
+end
 
 implements_node(Node) -- }}}
 
@@ -117,23 +187,41 @@ function LeafC(hash, key, val)
 	return setmetatable({hash = hash, key = key, val = val}, Leaf_mt)
 end
 
+local CLeafC
 function Leaf:assoc(shift, hash, key, val)
 	if hash == self.hash then
 		if key == self.key then
 			return self
 		end
-		return CleafC(hash, self, LeafC(hash, key, val))
+		return CLeafC(hash, {self, LeafC(hash, key, val)})
 	end
 	return Node.create(shift, self, hash, key, val)
 end
 
-function Leaf:without() error() end
-function Leaf:find() error() end
+function Leaf:without() TODO() end
+
+function Leaf:find(hash, key)
+	if hash == self.hash and key == self.key then
+		return self
+	end
+	return nil
+end
+
+local function leaf_it(self, state)
+	if state then
+		return false, self.key, self.val
+	end
+	return nil
+end
+
+function Leaf:iter()
+	return leaf_it, self, true
+end
 
 implements_node(Leaf) -- }}}
 
 local CLeaf = {} -- {{{
-local CLeaf_mt = {}
+local CLeaf_mt = { __index = CLeaf }
 
 function CLeafC(hash, leaves)
 	return setmetatable({hash = hash, leaves = leaves}, CLeaf_mt)
@@ -141,42 +229,91 @@ end
 
 function CLeaf:assoc(shift, hash, key, val)
 	if hash == self.hash then
-		local idx = idxFor(hash, key)
-		if idx then return self end
+		local idx = findIdx(self.leaves, hash, key)
+		if idx ~= -1 then
+			return self
+		end
 		local newLeaves = copy(self.leaves)
 		table.insert(newLeaves, LeafC(hash, key, val))
-		return CleafC(hash, newLeaves)
-
+		return CLeafC(hash, newLeaves)
 	end
 	return Node.create(shift, self, hash, key, val)
 end
 
-function CLeaf:without() error() end
-function CLeaf:find() error() end
+function CLeaf:without() TODO() end
+
+function CLeaf:find(hash, key)
+	local idx = findIdx(self.leaves, hash, key)
+	if idx == -1 then
+		return nil
+	end
+	return self.leaves[idx]
+end
+
+local function nested_iter(self, state)
+	if not state.state then
+		state.i = state.i + 1
+		local leaf = self.leaves[state.i]
+		if leaf == nil then return nil end
+		state.gen, state.param, state.state = leaf:iter()
+	end
+
+	local inner_state, k, v = state.gen(state.param, state.state)
+	state.state = inner_state
+	if inner_state == nil then
+		return nested_iter(self, inner_state)
+	end
+
+	return state, k, v
+end
+
+function CLeaf:iter()
+	return nested_iter, self, {i = 0}
+end
+
+function findIdx(leaves, hash, key)
+	for i, v in ipairs(leaves) do
+		if v:find(hash, key) ~= nil then
+			return i
+		end
+	end
+	return -1
+end
 
 implements_node(CLeaf) -- }}}
 
 -- }}}
 
+function Hash:len()
+	return self.count
+end
+mt.__len = Hash.len
+
 function Hash:assoc(key, val)
-	local newRoot = self.root:assoc(0, hashCode(key), key, val)
+	local newRoot = self.root:assoc(0, hashcode(key), key, val)
 	if newRoot == root then return self end
-	return Hmap{count = self.count + 1, root = newRoot}
+	local r = Hmap {count = self.count + 1, root = newRoot}
+	assert(r:get(key) == val)
+	return r
 end
 
 function Hash:get(key)
-	local entry = self.root:find(hashCode(key), key)
+	local entry = self.root:find(hashcode(key), key)
 	return entry and entry.val
 end
 
-function Hash:without(key)
-	local newRoot = root.without(hashCode(key), key)
-	if newRoot == root then
+function Hash:dissoc(key)
+	local newRoot = self.root:without(hashcode(key), key)
+	if newRoot == self.root then
 		return self
 	elseif newRoot == nil then
 		return Hash.EMPTY
 	end
 	return Hmap {count = self.count - 1, newRoot}
+end
+
+function Hash:pairs()
+	return self.root:iter()
 end
 
 Hash.EMPTY = Hmap {count = 0, root = {

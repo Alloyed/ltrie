@@ -41,15 +41,14 @@ describe("hashmaps", function()
 		assert.are.same(cmp, totable(new))
 	end)
 	
-	it("Implements dissoc()", function()
+	it("Implements dissoc() #atm", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
 
 		cmp.c = nil
+		assert.is.equal(12, new:get('c'))
 		new = new:dissoc('c')
-
 		assert.is.equal(2, new:len())
-		assert.are.same(cmp, new.table)
+		assert.is.equal(nil, new:get('c'))
 	end)
-
 end)

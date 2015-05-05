@@ -145,7 +145,42 @@ function Node:assoc(shift, hash, key, val)
 	end
 end
 
-function Node:without() TODO() end
+function Node:without(hash, key)
+	local bit = mask(hash, self.shift)
+	if b.band(self.bitmap, bit) == 0 then
+		return self
+	end
+
+	local idx = idxFor(self.bitmap, bit)
+	local n = self.nodes[idx]:without(hash, key)
+
+	if n == self.nodes[idx] then
+		return self
+	end
+
+	if n == nil then
+		if self.bitmap == bit then
+			return nil
+		end
+		local newNodes = copy(self.nodes)
+		for i=idx, #self.nodes do
+			newNodes[i] = newNodes[i+1]
+		end
+		return NodeC {
+			bitmap = self.bitmap,
+			nodes = newNodes,
+			shift = self.shift
+		}
+	end
+
+	local newNodes = copy(self.nodes)
+	newNodes[idx] = nil
+	return NodeC {
+		bitmap = self.bitmap,
+		nodes = newNodes,
+		shit = self.shift
+	}
+end
 
 function Node:find(hash, key)
 	local bit = mask(hash, self.shift)
@@ -198,7 +233,12 @@ function Leaf:assoc(shift, hash, key, val)
 	return Node.create(shift, self, hash, key, val)
 end
 
-function Leaf:without() TODO() end
+function Leaf:without(hash, key)
+	if hash == self.hash and key == self.key then
+		return nil
+	end
+	return self
+end
 
 function Leaf:find(hash, key)
 	if hash == self.hash and key == self.key then
@@ -240,7 +280,28 @@ function CLeaf:assoc(shift, hash, key, val)
 	return Node.create(shift, self, hash, key, val)
 end
 
-function CLeaf:without() TODO() end
+function CLeaf:without()
+	local idx = findIdx(self.leaves, hash, key)
+	if idx == -1 then
+		return self
+	end
+
+	local len = #self.leaves
+	if len == 2 then
+		if idx == 0 then
+			return self.leaves[2]
+		else
+			return self.leaves[1]
+		end
+	end
+
+	local newLeaves = copy(self.leaves)
+	for i=idx, len do
+		newLeaves[i] = newLeaves[i + 1]
+	end
+
+	return CleafC(hash, newLeaves)
+end
 
 function CLeaf:find(hash, key)
 	local idx = findIdx(self.leaves, hash, key)
@@ -309,7 +370,7 @@ function Hash:dissoc(key)
 	elseif newRoot == nil then
 		return Hash.EMPTY
 	end
-	return Hmap {count = self.count - 1, newRoot}
+	return Hmap {count = self.count - 1, root = newRoot}
 end
 
 function Hash:pairs()

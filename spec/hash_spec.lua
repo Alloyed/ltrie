@@ -8,7 +8,7 @@ describe("hashmaps", function()
 		return t
 	end
 
-	it("implements from()/get() #atm", function()
+	it("implements from()/get()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
 
@@ -40,8 +40,33 @@ describe("hashmaps", function()
 
 		assert.are.same(cmp, totable(new))
 	end)
+
+	it("Can hold/delete 2048 random elems #atm", function()
+		local ELEMS = 4096
+		local tbl = {}
+		local full = A.of()
+		for i=1, ELEMS do
+			tbl[tostring(i)] = i
+			full = full:assoc(tostring(i), i)
+		end
+
+		local empty = full
+
+		assert(full:get('1929') ~= full:get('1609'))
+
+		local elen = empty:len()
+		for k, v in pairs(tbl) do
+			assert.are.equal(v, full:get(k))
+			empty = empty:dissoc(k)
+			elen = elen - 1
+			assert.are.equal(elen, empty:len())
+		end
+
+		assert.is.equal(empty:len(), 0)
+		assert.is.equal(full:len(),  ELEMS)
+	end)
 	
-	it("Implements dissoc() #atm", function()
+	it("Implements dissoc()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
 

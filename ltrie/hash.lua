@@ -83,16 +83,17 @@ end
 -- }}}
 
 local function idxFor(bitmap, bit)
-	return popCount(b.band(bitmap, bit - 1)) + 1
+	local r = popCount(b.band(bitmap, bit - 1)) + 1
+	return r
 end
 
 local Node = {} -- {{{
-local Node_mt = {__index = Node}
+local Node_mt = { name = "Node.", __index = Node}
 
 local function NodeC(data)
-	assert(data.bitmap)
-	assert(data.nodes)
-	assert(data.shift)
+	assert(data.bitmap, "no bitmap")
+	assert(data.nodes, "no nodes")
+	assert(data.shift, "no shift")
 	return setmetatable(data, Node_mt)
 end
 
@@ -118,8 +119,8 @@ function Node:assoc(shift, hash, key, val)
 	local bit = mask(hash, shift)
 	local idx = idxFor(self.bitmap, bit)
 	if b.band(self.bitmap, bit) ~= 0 then -- collision
-		local n = nodes[idx]:assoc(shift + BITS, hash, key, val)
-		if n == nodes[idx] then
+		local n = self.nodes[idx]:assoc(shift + BITS, hash, key, val)
+		if n == self.nodes[idx] then
 			return self
 		else
 			local newNodes = copy(self.nodes)
@@ -152,9 +153,10 @@ function Node:without(hash, key)
 	end
 
 	local idx = idxFor(self.bitmap, bit)
-	local n = self.nodes[idx]:without(hash, key)
+	local N = self.nodes[idx]
+	local n = N and N:without(hash, key)
 
-	if n == self.nodes[idx] then
+	if n == N then
 		return self
 	end
 
@@ -167,18 +169,18 @@ function Node:without(hash, key)
 			newNodes[i] = newNodes[i+1]
 		end
 		return NodeC {
-			bitmap = self.bitmap,
+			bitmap = b.band(self.bitmap, b.bnot(bit)),
 			nodes = newNodes,
 			shift = self.shift
 		}
 	end
 
 	local newNodes = copy(self.nodes)
-	newNodes[idx] = nil
+	newNodes[idx] = n
 	return NodeC {
 		bitmap = self.bitmap,
 		nodes = newNodes,
-		shit = self.shift
+		shift = self.shift
 	}
 end
 
@@ -217,7 +219,7 @@ end
 implements_node(Node) -- }}}
 
 local Leaf = {} -- {{{
-local Leaf_mt = {__index = Leaf}
+local Leaf_mt = { name="K/V leaf", __index = Leaf}
 function LeafC(hash, key, val)
 	return setmetatable({hash = hash, key = key, val = val}, Leaf_mt)
 end
@@ -261,7 +263,7 @@ end
 implements_node(Leaf) -- }}}
 
 local CLeaf = {} -- {{{
-local CLeaf_mt = { __index = CLeaf }
+local CLeaf_mt = { name="Collision leaf", __index = CLeaf }
 
 function CLeafC(hash, leaves)
 	return setmetatable({hash = hash, leaves = leaves}, CLeaf_mt)
@@ -280,7 +282,7 @@ function CLeaf:assoc(shift, hash, key, val)
 	return Node.create(shift, self, hash, key, val)
 end
 
-function CLeaf:without()
+function CLeaf:without(hash, key)
 	local idx = findIdx(self.leaves, hash, key)
 	if idx == -1 then
 		return self
@@ -300,7 +302,7 @@ function CLeaf:without()
 		newLeaves[i] = newLeaves[i + 1]
 	end
 
-	return CleafC(hash, newLeaves)
+	return CLeafC(hash, newLeaves)
 end
 
 function CLeaf:find(hash, key)
@@ -364,8 +366,10 @@ function Hash:get(key)
 end
 
 function Hash:dissoc(key)
-	local newRoot = self.root:without(hashcode(key), key)
+	local hc = hashcode(key)
+	local newRoot = self.root:without(hc, key)
 	if newRoot == self.root then
+		assert(self.root:find(hc, key) == nil)
 		return self
 	elseif newRoot == nil then
 		return Hash.EMPTY

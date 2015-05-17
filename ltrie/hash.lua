@@ -8,7 +8,7 @@ local function try(...)
 	if not ok then return nil end
 	return err
 end
-local fun = require 'fun'
+local fun = require 'ltrie.fun'
 local b = bit32 or try(require, 'bit') or error("No bitop lib found")
 local hashcode = require 'hashcode'.hashcode
 

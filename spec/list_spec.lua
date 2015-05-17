@@ -1,5 +1,5 @@
 describe("list", function()
-	local fun  = require 'fun'
+	local fun  = require 'ltrie.fun'
 	local list = require 'ltrie.list'
 
 	it("implements (from)", function()

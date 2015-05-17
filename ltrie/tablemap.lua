@@ -1,8 +1,8 @@
 --- A COW Map using lua's native tables, for testing
 
-local fun = require 'fun'
-local AMap = {}
-local mt   = { __index = AMap }
+local fun = require 'ltrie.fun'
+local TMap = {}
+local mt   = { __index = TMap }
 
 local function ctor(data)
 	assert(data.table)
@@ -13,7 +13,7 @@ end
 local EMPTY = ctor {table = {}, count = 0}
 
 --- Map from iterator
-function AMap.from(...)
+function TMap.from(...)
 	local t = EMPTY
 	fun.each(function(k, v)
 		t = t:assoc(k, v)
@@ -22,7 +22,7 @@ function AMap.from(...)
 end
 
 --- Map from varargs
-function AMap.of(...)
+function TMap.of(...)
 	local t = EMPTY
 	for i=1, select('#', ...), 2 do
 		local k, v = select(i, ...)
@@ -32,13 +32,13 @@ function AMap.of(...)
 end
 
 --- Map from table
-function AMap.wrap_table(tbl)
+function TMap.wrap_table(tbl)
 	local i = 0
 	for _ in pairs(tbl) do i = i + 1 end
 	return ctor { table = tbl, count = i }
 end
 
-function AMap:len()
+function TMap:len()
 	return self.count
 end
 
@@ -50,24 +50,24 @@ local function copy(tbl)
 	return new
 end
 
-function AMap:assoc(k, v)
+function TMap:assoc(k, v)
 	local newtbl = copy(self.table)
 	newtbl[k] = v
-	return AMap.wrap_table(newtbl)
+	return TMap.wrap_table(newtbl)
 end
 
-function AMap:dissoc(k)
+function TMap:dissoc(k)
 	local newtbl = copy(self.table)
 	newtbl[k] = nil
-	return AMap.wrap_table(newtbl)
+	return TMap.wrap_table(newtbl)
 end
 
-function AMap:get(k)
+function TMap:get(k)
 	return self.table[k]
 end
 
-function AMap:pairs()
+function TMap:pairs()
 	return pairs(self.table)
 end
 
-return AMap
+return TMap

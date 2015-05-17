@@ -19,5 +19,8 @@ build = {
       ['ltrie.list'] = "ltrie/list.lua",
       ['ltrie.subvec'] = "ltrie/subvec.lua",
       ['ltrie.vector'] = "ltrie/vector.lua",
+	  ['ltrie.fun']    = "ltrie/fun.lua",
+	  ['ltrie.tablemap'] = "ltrie/tablemap.lua",
+
    }
 }

@@ -1,5 +1,5 @@
-describe("arraymap", function()
-	local A = require 'ltrie.arraymap'
+describe("tablemap", function()
+	local A = require 'ltrie.tablemap'
 	it("implements from()/pairs()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)

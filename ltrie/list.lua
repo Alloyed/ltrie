@@ -1,5 +1,5 @@
 -- Naive linked list implementation
-local fun = require 'fun'
+local fun = require 'ltrie.fun'
 
 local List = {}
 local mt = { __index = List }

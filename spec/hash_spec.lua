@@ -41,7 +41,7 @@ describe("hashmaps", function()
 		assert.are.same(cmp, totable(new))
 	end)
 
-	it("Can hold/delete 2048 random elems #atm", function()
+	it("Can hold/delete 2048 elems", function()
 		local ELEMS = 4096
 		local tbl = {}
 		local full = A.of()
@@ -52,12 +52,13 @@ describe("hashmaps", function()
 
 		local empty = full
 
-		assert(full:get('1929') ~= full:get('1609'))
+		assert.are_not.equal(full:get('1929'), full:get('1609'))
 
 		local elen = empty:len()
 		for k, v in pairs(tbl) do
-			assert.are.equal(v, full:get(k))
+			assert.are.equal(v, empty:get(k))
 			empty = empty:dissoc(k)
+			assert.are.equal(nil, empty:get(k))
 			elen = elen - 1
 			assert.are.equal(elen, empty:len())
 		end

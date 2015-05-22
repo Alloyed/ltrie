@@ -147,6 +147,7 @@ function Node:assoc(shift, hash, key, val)
 end
 
 function Node:without(hash, key)
+
 	local bit = mask(hash, self.shift)
 	if b.band(self.bitmap, bit) == 0 then
 		return self
@@ -290,7 +291,7 @@ function CLeaf:without(hash, key)
 
 	local len = #self.leaves
 	if len == 2 then
-		if idx == 0 then
+		if idx == 1 then
 			return self.leaves[2]
 		else
 			return self.leaves[1]
@@ -374,6 +375,7 @@ function Hash:dissoc(key)
 	elseif newRoot == nil then
 		return Hash.EMPTY
 	end
+	assert(newRoot:find(hc, key) == nil)
 	return Hmap {count = self.count - 1, root = newRoot}
 end
 

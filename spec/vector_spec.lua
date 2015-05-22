@@ -56,6 +56,7 @@ end)
 describe("subvec", function()
 	local Vector = require 'ltrie.vector'
 	local Subvec = require 'ltrie.subvec'
+	local fun    = require 'ltrie.fun'
 
 	local vec = Vector.of()
 	for i=1, 50 do
@@ -83,6 +84,14 @@ describe("subvec", function()
 		end
 	end)
 
+	it("is iterable", function()
+		local sv = Subvec.new(vec, 11, 20)
+		assert.is.equal(sv:len(), 10)
+		fun.each(function(i, v)
+			assert.is.equal(v, vec:get(i+10))
+		end, fun.enumerate(sv))
+	end)
+
 	it("implements conj() and assoc()", function()
 		local sv = Subvec.new(vec, 1, 5)
 
@@ -94,6 +103,7 @@ describe("subvec", function()
 		assert.is.equal(sv:get(2), 'b')
 		assert.is_not.equal(vec:get(2), 'b')
 	end)
+
 	it("implements pop()", function()
 		local sv = Subvec.new(vec, 1, 5)
 		assert.is.equal(sv:len(), 5)

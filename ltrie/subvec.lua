@@ -3,7 +3,7 @@
 local Vector = require 'ltrie.vector'
 local Subvec = {}
 
-local mt = {__index = Subvec}
+local mt = {__index = Subvec, __ipairs = Vector.ipairs}
 
 function Subvec.new(vec, vecStart, vecEnd)
 	if (getmetatable(vec) == mt) then

@@ -24,6 +24,10 @@ local mt = {
 	__index = Vector,
 }
 
+function Vector.is_vector(v)
+	return getmetatable(v) == mt
+end
+
 local function Vec(data)
 	assert(data.count)
 	assert(data.shift)
@@ -135,6 +139,18 @@ function Vector:ipairs()
 	return iter, self, 0
 end
 mt.__ipairs = Vector.ipairs
+
+function Vector:unpack()
+	local l = self:len()
+	local function loop(i)
+		if i >= len then
+			return self:get(i)
+		end
+		return self:get(i), loop(i+1)
+	end
+
+	return loop(1)
+end
 
 local function newPath(level, node)
 	if level == 0 then

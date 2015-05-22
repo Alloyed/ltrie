@@ -5,6 +5,15 @@
 ---
 --- Distributed under the MIT/X11 License. See COPYING.md for more details.
 ---
+--- Modified for luafun. Changes from upstream luafun are:
+--- * iterators implement __len()
+--- * fun.numargs(iter) is exported for external use
+--- * iter:find(pred) is like index(), but uses a predicate function.
+--- * iter:get() is an alias for nth(). method-only.
+--- * fun.xunpack(iter) functions like unpack(table).
+--  * iter:unpack() is an alias for xunpack(). method-only.
+--- * iter:decons() returns iter:head(), iter:tail(). convenience function.
+
 local exports = {}
 local methods = {}
 
@@ -321,6 +330,7 @@ local nth = function(n, gen_x, param_x, state_x)
     return return_if_not_empty(gen_x(param_x, state_x))
 end
 methods.nth = method1(nth)
+methods.get = methods.nth
 exports.nth = export1(nth)
 
 local head_call = function(state, ...)
@@ -349,6 +359,16 @@ methods.tail = method0(tail)
 exports.tail = export0(tail)
 exports.cdr = exports.tail
 methods.cdr = methods.tail
+
+local decons = function(gen, param, state)
+	local new_state, val = gen(param, state)
+	if new_state == nil then
+		return val, wrap(nil_gen, nil, nil)
+	end
+	return val, wrap(gen, param, new_state)
+end
+methods.decons = method0(decons)
+exports.decons = export0(decons)
 
 local take_n_gen_x = function(i, state_x, ...)
     if state_x == nil then
@@ -401,6 +421,17 @@ local take = function(n_or_fun, gen, param, state)
 end
 methods.take = method1(take)
 exports.take = export1(take)
+
+local function xunwrap(gen, param, state)
+	local next_state, val = gen(param, state)
+	if next_state == nil then
+		return -- none does not add to varargs
+	end
+	return val, xunwrap(gen, param, next_state)
+end
+methods.xunwrap = method0(xunwrap)
+methods.unwrap  = methods.xunwrap
+exports.xunwrap = export0(xunwrap)
 
 local drop_n = function(n, gen, param, state)
     assert(n >= 0, "invalid first argument to drop_n")
@@ -629,6 +660,7 @@ local length = function(gen, param, state)
 end
 methods.length = method0(length)
 exports.length = export0(length)
+iterator_mt.__len = methods.length
 
 local is_null = function(gen, param, state)
     return gen(param, deepcopy(state)) == nil

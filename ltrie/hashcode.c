@@ -33,7 +33,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#define LMAX 64
+#define LMAX 0x7FFFFFFF
 
 #define lmod(s,size) ((int)(s) & ((size)-1))
 

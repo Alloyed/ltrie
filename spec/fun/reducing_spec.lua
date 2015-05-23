@@ -16,7 +16,7 @@ describe("Reducing", function()
 		assert.is.equal(15, fun.foldl(function(acc, x)
 			return acc + x
 		end, 0, fun.range(5)))
-		assert.is.equal(15, fun.foldl(operator.add, 0, fun.range(5)))
+		assert.is.equal(15, fun.foldl(fun.operator.add, 0, fun.range(5)))
 		assert.is.equal(20, fun.foldl(function(acc, x, y)
 			return acc + x * y
 		end, 0, fun.zip(fun.range(1, 5), {4, 3, 2, 1})))
@@ -61,7 +61,6 @@ describe("Reducing", function()
 		assert.is_false(fun.any(function(x) return x end, {false, false, false, false}))
 		assert.is_true(fun.any(function(x) return x end, {false, false, false, true}))
 		assert.is_false(fun.any(function(x) return x end, {}))
-		assert.is.equal(fun.some, fun.any)
 	end)
 
 	it("sum", function()

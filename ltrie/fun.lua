@@ -1,18 +1,45 @@
 ---
---- Lua Fun - a high-performance functional programming library for LuaJIT
----
---- Copyright (c) 2013-2014 Roman Tsisyk <roman@tsisyk.com>
----
---- Distributed under the MIT/X11 License. See COPYING.md for more details.
----
---- Modified for luafun. Changes from upstream luafun are:
---- * iterators implement __len()
---- * fun.numargs(iter) is exported for external use
---- * iter:find(pred) is like index(), but uses a predicate function.
---- * iter:get() is an alias for nth(). method-only.
---- * fun.xunpack(iter) functions like unpack(table).
---  * iter:unpack() is an alias for xunpack(). method-only.
---- * iter:decons() returns iter:head(), iter:tail(). convenience function.
+-- Lua Fun - a high-performance functional programming library for LuaJIT
+--
+-------------------------------------------------------------------------------
+--
+-- **Lua Fun** source code, logo and documentation are distributed under the
+-- **[MIT/X11 License]** - same as Lua and LuaJIT.
+--
+-- Copyright (c) 2013-2014 Roman Tsisyk <roman@tsisyk.com>
+--
+-- Permission is hereby granted, free of charge, to any person obtaining a
+-- copy of this software and associated documentation files (the "Software"),
+-- to deal in the Software without restriction, including without limitation
+-- the rights to use, copy, modify, merge, publish, distribute, sublicense,
+-- and/or sell copies of the Software, and to permit persons to whom the
+-- Software is furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+-- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+-- DEALINGS IN THE SOFTWARE.
+--
+-- [MIT/X11 License]: http://www.opensource.org/licenses/mit-license.php
+--
+-------------------------------------------------------------------------------
+--
+-- Modified for ltrie. Changes from upstream luafun are:
+-- * iterators implement `__len()`
+-- * `fun.numargs(iter)` is exported for external use
+-- * `iter:find(pred)` is like `index()`, but uses a predicate function.
+-- * `fun.some()` is now an alias for `fun.find()` instead of `fun.any()`.
+-- * `iter:get()` is an alias for `nth()`. method-only.
+-- * `fun.xunpack(iter)` functions like `unpack(table)`.
+-- * `iter:unpack()` is an alias for `xunpack()`. method-only.
+-- * `iter:decons()` returns `iter:head(), iter:tail()`. convenience function.
+-- * name export mistakes, see GH rtsisyk/luafun#12
 
 local exports = {}
 local methods = {}
@@ -84,7 +111,7 @@ local nil_gen = function(_param, _state)
 end
 
 local string_gen = function(param, state)
-    local state = state + 1
+    state = state + 1
     if state > #param then
         return nil
     end
@@ -95,7 +122,7 @@ end
 local pairs_gen = pairs({ a = 0 }) -- get the generating function from pairs
 local map_gen = function(tab, key)
     local value
-    local key, value = pairs_gen(tab, key)
+    key, value = pairs_gen(tab, key)
     return key, key, value
 end
 
@@ -190,7 +217,7 @@ exports.foreach = exports.each
 
 local range_gen = function(param, state)
     local stop, step = param[1], param[2]
-    local state = state + step
+    state = state + step
     if state > stop then
         return nil
     end
@@ -199,7 +226,7 @@ end
 
 local range_rev_gen = function(param, state)
     local stop, step = param[1], param[2]
-    local state = state + step
+    state = state + step
     if state < stop then
         return nil
     end
@@ -232,11 +259,11 @@ end
 exports.range = range
 
 local natural_gen = function(param, state)
-	return state + 1, state + 1
+    return state + 1, state + 1
 end
 
 local naturals = function()
-	return wrap(natural_gen, 0, 0)
+    return wrap(natural_gen, 0, 0)
 end
 
 
@@ -361,11 +388,11 @@ exports.cdr = exports.tail
 methods.cdr = methods.tail
 
 local decons = function(gen, param, state)
-	local new_state, val = gen(param, state)
-	if new_state == nil then
-		return val, wrap(nil_gen, nil, nil)
-	end
-	return val, wrap(gen, param, new_state)
+    local new_state, val = gen(param, state)
+    if new_state == nil then
+        return val, wrap(nil_gen, nil, nil)
+    end
+    return val, wrap(gen, param, new_state)
 end
 methods.decons = method0(decons)
 exports.decons = export0(decons)
@@ -422,16 +449,16 @@ end
 methods.take = method1(take)
 exports.take = export1(take)
 
-local function xunwrap(gen, param, state)
-	local next_state, val = gen(param, state)
-	if next_state == nil then
-		return -- none does not add to varargs
-	end
-	return val, xunwrap(gen, param, next_state)
+local function xunpack(gen, param, state)
+    local next_state, val = gen(param, state)
+    if next_state == nil then
+        return -- none does not add to varargs
+    end
+    return val, xunpack(gen, param, next_state)
 end
-methods.xunwrap = method0(xunwrap)
-methods.unwrap  = methods.xunwrap
-exports.xunwrap = export0(xunwrap)
+methods.xunpack = method0(xunpack)
+methods.unpack  = methods.xunpack
+exports.xunpack = export0(xunpack)
 
 local drop_n = function(n, gen, param, state)
     assert(n >= 0, "invalid first argument to drop_n")
@@ -495,18 +522,18 @@ exports.span = exports.split
 --------------------------------------------------------------------------------
 
 local find = function(pred, gen, param, state)
-	for _k, v in gen, param, state do
-		local r = pred(v)
-		if r then
-			return r
-		end
-	end
-	return nil
+    for _k, v in gen, param, state do
+        local r = pred(v)
+        if r then
+            return r
+        end
+    end
+    return nil
 end
 methods.find = method1(find)
 exports.find = export1(find)
-methods.elem = methods.find
-exports.elem = exports.find
+methods.some = methods.find
+exports.some = exports.find
 
 local index = function(x, gen, param, state)
     local i = 1
@@ -708,8 +735,6 @@ local any = function(fun, gen_x, param_x, state_x)
 end
 methods.any = method1(any)
 exports.any = export1(any)
-methods.some = methods.any
-exports.some = exports.any
 
 local sum = function(gen, param, state)
     local s = 0
@@ -820,8 +845,8 @@ local max_by = function(cmp, gen_x, param_x, state_x)
 end
 methods.max_by = method1(max_by)
 exports.max_by = export1(max_by)
-methods.maximum_by = methods.maximum_by
-exports.maximum_by = exports.maximum_by
+methods.maximum_by = methods.max_by
+exports.maximum_by = exports.max_by
 
 local totable = function(gen_x, param_x, state_x)
     local tab, key, val = {}
@@ -1035,7 +1060,7 @@ exports.chain = chain
 -- Operators
 --------------------------------------------------------------------------------
 
-operator = {
+local operator = {
     ----------------------------------------------------------------------------
     -- Comparison operators
     ----------------------------------------------------------------------------
@@ -1091,7 +1116,12 @@ methods.op = operator
 -- a special syntax sugar to export all functions to the global table
 setmetatable(exports, {
     __call = function(t)
-        for k, v in pairs(t) do _G[k] = v end
+        if not _G._LUAFUN then
+            for k, v in pairs(t) do _G[k] = v end
+            _G._LUAFUN = t
+        else
+            error("Luafun already imported")
+        end
     end,
 })
 

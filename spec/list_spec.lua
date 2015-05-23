@@ -5,7 +5,7 @@ describe("list", function()
 	it("implements (from)", function()
 		assert.are.same(
 			list.from{1, 2, 3},
-			list.cons(1, list.cons(2, list.cons(3, nil))))
+			list.EMPTY:conj(3):conj(2):conj(1))
 	end)
 	it("implements (get)", function()
 		assert.is.equal(list.get(list.from{6, 7, 8}, 2), 7)

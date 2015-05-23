@@ -64,12 +64,16 @@ local function cdr(self)
 	return rawget(self, '_cdr')
 end
 
+local function decons(self)
+	return car(self), cdr(self)
+end
+
 local function _ipairs(param, state)
 	if state == List.EMPTY then
 		return nil
 	end
 
-	local head, tail = List.decons(state)
+	local head, tail = decons(state)
 	if not List.is_list(tail) then
 		return List.EMPTY, head, tail
 	end
@@ -122,7 +126,7 @@ end
 --@param val the value to add
 --@usage List.of(2, 3):conj(1) == List.of(1, 2, 3)
 function List:conj(val)
-	return List.cons(val, self)
+	return cons(val, self)
 end
 
 --- Returns a new list with the first value removed.
@@ -147,10 +151,10 @@ function List:assoc(idx, val)
 		new_l = cdr(new_l)
 		i = i + 1
 	end
-	new_l = List.cons(val, new_l)
+	new_l = cons(val, new_l)
 
 	for i=#tmp-1, 1, -1 do
-		new_l = List.cons(tmp[i], new_l)
+		new_l = cons(tmp[i], new_l)
 	end
 	return new_l
 end

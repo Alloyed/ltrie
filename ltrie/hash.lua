@@ -1,4 +1,26 @@
---- A Hash Array Mapped Trie, ie. PersistentHashMap in Clojure.
+--- An immutable hashmap, modelled after PersistentHashMap in Clojure.
+--  Hashmaps much like lua tables in that they map keys to values:
+--
+--  	local my_map = Hashmap.from { foo = 'bar', [2] = 'baz' }
+--  	print(my_map:get('foo')) -- 'bar'
+--
+--  But because they are persistent, modifications create a new Hashmap instead
+--  of changing the old one:
+--
+--  	local my_new_map = my_map:assoc('foo', 42)
+--  	print(my_new_map:get('foo')) -- 42
+--  	print(my_map:get('foo')) -- still 'bar'
+--
+--  It is internally implemented as a Hash Array Mapped Trie (HAMT), which you
+--  can learn more about from the [Wikipedia article][1].
+--
+--  [1]: https://en.wikipedia.org/wiki/Hash_array_mapped_trie
+--
+--  @module Hashmap
+--
+
+-- Implementation Details:
+-- =======================
 -- For my own sanity, I used <http://git.io/vJeZx> as my model.
 -- To match Lua's index-by-one semantics I had to introduce an offset or two.
 -- Every line I've done that on is marked with a +1 or -1 comment.
@@ -14,10 +36,6 @@ local hashcode = require 'hashcode'.hashcode
 
 local Hash = {}
 local mt = { __index = Hash }
-
-local function TODO()
-	return error("TODO", 2)
-end
 
 local function Hmap(data)
 	assert(data.count)

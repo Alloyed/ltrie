@@ -1,11 +1,41 @@
---- A persistent vector implementation, modeled after Clojure's
--- PersistentVector. A good blogpost explaining the structure:
+--- An immutable vector datatype, modeled after Clojure's PersistentVector.
+--  It can be used to store sequential data, much like Lua tables:
+--
+--  	local my_vector = Vector.from('a', 'b', 'c')
+--  	print(my_vector:get(2)) -- 'c'
+--
+--  But because they are persistent, modifications create a new vector instead
+--  of changing the old one:
+--
+--  	local my_new_vector = my_vector:set(2, 'd')
+--  	print(my_new_vector:get(2)) -- 'd'
+--  	print(my_vector:get(2))     -- still 'c'
+--
+--  Vectors are dense, ordered, and indexed-by-one, meaning a vector will never
+--  have an element whose index doesn't fall in between `[1 .. v:len()]`.
+--
+--  `nil` is a valid element, however, so a vector like:
+--
+--  	Vector.of(1, nil, nil, 4)
+--
+--  has a size of four, and iterating through it
+--  will include the nil values.
+--
+--  @module Vector
+
+-- Implementation Notes
+-- ====================
+--
+-- A good blogpost explaining the structure's implementation:
 --
 -- <http://hypirion.com/musings/understanding-persistent-vector-pt-1>
 --
+-- My reference code was this particular commit:
+--
+-- <http://git.io/vT7zG>
+--
 -- To match Lua's index-by-one semantics I had to introduce an offset or two.
 -- Every line I've done that on is marked with a +1 or -1 comment.
--- @module Vector
 
 local function try(...)
 	local ok, err = pcall(...)
@@ -23,10 +53,6 @@ local Vector = {}
 local mt = {
 	__index = Vector,
 }
-
-function Vector.is_vector(v)
-	return getmetatable(v) == mt
-end
 
 local function Vec(data)
 	assert(data.count)
@@ -53,7 +79,7 @@ local EMPTY = Vec {
 }
 
 --- Creates a vector containing the elements provided by the given iterator.
--- @param ... the iterator
+-- @tparam iterator genparamstate the iterator
 -- @usage Vector.from(ipairs {1, 2, 3, 4})
 function Vector.from(...)
 	local r = EMPTY
@@ -69,15 +95,25 @@ end
 function Vector.of(...)
 	local r =  EMPTY
 	for i=1, select('#', ...) do
-		r = r:conj(selec(i, ...))
+		r = r:conj(select(i, ...))
 	end
 	return r
+end
+
+--- Checks to see if given object is a vector.
+-- @param o anything
+-- @treturn bool `true` if List, false if not
+function Vector.is_vector(o)
+	return getmetatable(o) == mt
 end
 
 --- @type Vector
 
 --- Returns the number of elements contained in the vector.
 -- In lua 5.2 and up, `#vector` can be used as a shortcut.
+--
+-- @complexity O(1)
+-- @usage Vector.of(1, 2, 3):len() == 3
 function Vector:len()
 	return self.count
 end
@@ -117,8 +153,12 @@ local function arrayFor(trie, idx)
 	return node
 end
 
---- Returns the value stored at `idx`, or `nil` otherwise.
+--- Get a value by index. Vector indexes start at one.
+--
+-- @complexity O(log32 n)
 -- @tparam int idx the index
+-- @return the value, or `nil` if not found
+-- @usage Vector.of(1, 2, 3):get(1) == 1
 function Vector:get(idx)
 	idx = idx - 1 -- -1
 	local node = arrayFor(self, idx)
@@ -135,6 +175,12 @@ local function iter(param, state)
 		return idx, val
 	end
 end
+
+--- Iterate through the vector, from beginning to end.
+--
+-- Note that instead of returning `index, value` per iteration like normal
+-- `ipairs()`, the value of `index` is implementation-defined.
+-- @usage for _it, v in my_vector:ipairs() do print(v) end
 function Vector:ipairs()
 	return iter, self, 0
 end
@@ -183,7 +229,9 @@ local function pushTail(self, level, parent, tailNode)
 end
 
 --- Returns a new vector with val appended to the end.
+-- @complexity O(1)
 -- @param val the value to append
+-- @usage Vector.of(1, 2):conj(3) == Vector.of(1, 2, 3)
 function Vector:conj(val)
 	local idx = self.count
 	-- Is there room in the tail?
@@ -230,8 +278,10 @@ local function doAssoc(level, node, idx, val)
 end
 
 --- Returns a new vector such that `vector:get(idx) == val`
--- @tparam int idx the index to set.
+-- @complexity O(log32 n)
+-- @tparam int idx the index to set
 -- @param val the value to set
+-- @usage Vector.of(0, 0, 0):assoc(2, 'a') == Vector.of(0, 'a', 0)
 function Vector:assoc(idx, val)
 	idx = idx - 1 -- -1
 	if idx == self.count then
@@ -272,9 +322,9 @@ local function popTail(level, node)
 	end
 end
 
---- Returns a new vector with the last element removed. Yes, I know
--- that's not the traditional definition of pop(), but it's the name clojure
--- uses.
+--- Returns a new vector with the last value removed.
+-- @complexity O(1)
+-- @usage Vector.of(1, 2, 3):pop() == Vector.of(1, 2)
 function Vector:pop()
 	if self.count == 0 then
 		return error("Can't pop from empty vector")

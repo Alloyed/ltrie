@@ -1,4 +1,4 @@
----
+--
 -- Lua Fun - a high-performance functional programming library for LuaJIT
 --
 -------------------------------------------------------------------------------

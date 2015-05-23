@@ -4,7 +4,7 @@
 -------------------------------------------------------------------------------
 --
 -- **Lua Fun** source code, logo and documentation are distributed under the
--- **[MIT/X11 License]** - same as Lua and LuaJIT.
+-- **[MIT License]** - same as Lua and LuaJIT.
 --
 -- Copyright (c) 2013-2014 Roman Tsisyk <roman@tsisyk.com>
 --
@@ -26,7 +26,7 @@
 -- FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 -- DEALINGS IN THE SOFTWARE.
 --
--- [MIT/X11 License]: http://www.opensource.org/licenses/mit-license.php
+-- [MIT License]: http://www.opensource.org/licenses/mit-license.php
 --
 -------------------------------------------------------------------------------
 --

@@ -1,5 +1,5 @@
 describe("hashmaps", function()
-	local A = require 'ltrie.hash'
+	local A = require 'ltrie.hashmap'
 	local function totable(new)
 		local t = {}
 		for _it, k, v in new:pairs() do

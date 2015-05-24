@@ -2,7 +2,7 @@ describe("hashmaps", function()
 	local A = require 'ltrie.hashmap'
 	local function totable(new)
 		local t = {}
-		for _it, k, v in new:pairs() do
+		for k, v in new:pairs() do
 			t[k] = v
 		end
 		return t
@@ -24,7 +24,7 @@ describe("hashmaps", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.of('a', 'a', 'b', 'c', 'c', 12)
 
-		for _it, k, v in new:pairs() do
+		for k, v in new:pairs() do
 			assert.are.equal(v, cmp[k])
 		end
 	end)

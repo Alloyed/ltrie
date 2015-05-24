@@ -397,9 +397,22 @@ function Hash:dissoc(key)
 	return Hmap {count = self.count - 1, root = newRoot}
 end
 
-function Hash:pairs()
+function Hash:ipairs()
 	return self.root:iter()
 end
+mt.__ipairs = Hash.ipairs
+
+function Hash:pairs()
+	local gen, param, state = self.root:iter()
+	local function iter()
+		-- since we use the same mutable state table we can ignore _it
+		local _it, k, v = gen(param, state)
+		return k, v
+	end
+
+	return iter, param, state
+end
+mt.__pairs = Hash.pairs
 
 Hash.EMPTY = Hmap {count = 0, root = {
 	assoc = function(self, shift, hash, key, val)

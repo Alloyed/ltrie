@@ -1,3 +1,8 @@
+require 'spec/strict' ()
+
+global 'bit32'
+global 'file'
+
 describe("hashmaps", function()
 	local A = require 'ltrie.hashmap'
 	local function totable(new)

@@ -236,7 +236,7 @@ function Vector:conj(val)
 	local idx = self.count
 	-- Is there room in the tail?
 	if self.count - tailoff(self) < WIDTH then
-		newTail = copy(self.tail)
+		local newTail = copy(self.tail)
 		table.insert(newTail, val)
 		return VecW(self, {
 			count = self.count + 1,

@@ -1,3 +1,7 @@
+require 'spec/strict' ()
+global('bit32')
+global('file')
+
 describe("Persistent Vectors", function()
 	local Vector = require 'ltrie.vector'
 	local tbl = {}

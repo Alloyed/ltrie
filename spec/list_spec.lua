@@ -1,3 +1,8 @@
+require 'spec/strict' ()
+
+global 'bit32'
+global 'file'
+
 describe("list", function()
 	local fun  = require 'ltrie.fun'
 	local list = require 'ltrie.list'

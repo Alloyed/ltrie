@@ -1,3 +1,8 @@
+require 'spec/strict' ()
+
+global 'bit32'
+global 'file'
+
 describe("tablemap", function()
 	local A = require 'ltrie.tablemap'
 	it("implements from()/pairs()", function()

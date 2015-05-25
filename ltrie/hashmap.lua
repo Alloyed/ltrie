@@ -150,7 +150,7 @@ function Node:assoc(shift, hash, key, val)
 			}, upd
 		end
 	else
-		newNodes = copy(self.nodes)
+		local newNodes = copy(self.nodes)
 		-- Shift forward old nodes
 		for i=#self.nodes, idx, -1 do
 			newNodes[i+1] = newNodes[i]

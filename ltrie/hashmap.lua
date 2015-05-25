@@ -137,9 +137,9 @@ function Node:assoc(shift, hash, key, val)
 	local bit = mask(hash, shift)
 	local idx = idxFor(self.bitmap, bit)
 	if b.band(self.bitmap, bit) ~= 0 then -- collision
-		local n = self.nodes[idx]:assoc(shift + BITS, hash, key, val)
+		local n, upd = self.nodes[idx]:assoc(shift + BITS, hash, key, val)
 		if n == self.nodes[idx] then
-			return self
+			return self, upd
 		else
 			local newNodes = copy(self.nodes)
 			newNodes[idx] = n
@@ -147,7 +147,7 @@ function Node:assoc(shift, hash, key, val)
 				bitmap = self.bitmap,
 				nodes  = newNodes,
 				shift  = shift
-			}
+			}, upd
 		end
 	else
 		newNodes = copy(self.nodes)
@@ -247,7 +247,11 @@ local CLeafC
 function Leaf:assoc(shift, hash, key, val)
 	if hash == self.hash then
 		if key == self.key then
-			return self
+			if val == self.val then
+				return self
+			else
+				return LeafC(hash, key, val), true
+			end
 		end
 		return CLeafC(hash, {self, LeafC(hash, key, val)})
 	end
@@ -292,7 +296,7 @@ function CLeaf:assoc(shift, hash, key, val)
 	if hash == self.hash then
 		local idx = findIdx(self.leaves, hash, key)
 		if idx ~= -1 then
-			return self
+			return self:assoc(shift, hash, key, val)
 		end
 		local newLeaves = copy(self.leaves)
 		table.insert(newLeaves, LeafC(hash, key, val))
@@ -372,9 +376,12 @@ end
 mt.__len = Hash.len
 
 function Hash:assoc(key, val)
-	local newRoot = self.root:assoc(0, hashcode(key), key, val)
-	if newRoot == root then return self end
-	local r = Hmap {count = self.count + 1, root = newRoot}
+	local newRoot, isUpdate = self.root:assoc(0, hashcode(key), key, val)
+	if newRoot == self.root then 
+		return self
+	end
+	local newCount = self.count + (isUpdate and 0 or 1)
+	local r = Hmap {count = newCount, root = newRoot}
 	assert(r:get(key) == val)
 	return r
 end

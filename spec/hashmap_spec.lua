@@ -20,7 +20,7 @@ describe("hashmaps", function()
 		assert.are_not.equal(new:get('a'), cmp.a)
 	end)
 
-	it("Implements of()/pairs()", function()
+	it("implements of()/pairs()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.of('a', 'a', 'b', 'c', 'c', 12)
 
@@ -29,7 +29,7 @@ describe("hashmaps", function()
 		end
 	end)
 
-	it("Implements assoc()/len()", function()
+	it("implements assoc()/len()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
 
@@ -41,7 +41,36 @@ describe("hashmaps", function()
 		assert.are.same(cmp, totable(new))
 	end)
 
-	it("Can hold/delete 2048 elems", function()
+	it("can overwrite existing values using assoc() #atm", function()
+		local t = A.from { a = 1 }
+
+		assert.is.equal(1, t:get('a'))
+		assert.is.equal(1, t:len())
+
+		t = t:assoc('a', 1)
+		assert.is.equal(1, t:get('a'))
+		assert.is.equal(1, t:len())
+
+		t = t:assoc('a', 4)
+		assert.is.equal(4, t:get('a'))
+		assert.is.equal(1, t:len())
+
+
+		t = A.from {a = 1, b = 2, c = 3}
+
+		assert.is.equal(1, t:get('a'))
+		assert.is.equal(3, t:len())
+
+		t = t:assoc('a', 1)
+		assert.is.equal(1, t:get('a'))
+		assert.is.equal(3, t:len())
+
+		t = t:assoc('a', 4)
+		assert.is.equal(4, t:get('a'))
+		assert.is.equal(3, t:len())
+	end)
+
+	it("can hold/delete 2048 elems", function()
 		local ELEMS = 4096
 		local tbl = {}
 		local full = A.of()
@@ -67,7 +96,7 @@ describe("hashmaps", function()
 		assert.is.equal(full:len(),  ELEMS)
 	end)
 	
-	it("Implements dissoc()", function()
+	it("implements dissoc()", function()
 		local cmp = { a = 'a', b = 'c', c = 12 }
 		local new = A.from(cmp)
 

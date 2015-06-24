@@ -43,29 +43,30 @@ local function Hmap(data)
 	return setmetatable(data, mt)
 end
 
-local function HmapW(data)
-	for k, v in pairs(self) do
-		if not data[k] then
-			data[k] = v
-		end
-	end
-	return Hmap(data)
-end
-
+--- Creates a hashmap containing the key-value pairs provided by the given
+-- iterator. If keys are repeated then later pairs take precedence.
+-- @tparam iterator genparamstate the associative iterator. @see luafun.
+-- @usage Hash.from(pairs {a = 1, b = 2, c = 3})
 function Hash.from(...)
-	local r = Hash.EMPTY
-	fun.each(function (k, v)
+	local r = Hash.EMPTY:asMutable()
+	fun.each(function(k, v)
 		r = r:assoc(k, v)
 	end, ...)
+	r:asImmutable()
 	return r
 end
 
+--- Creates a hashmap containing the arguments. pairs are specified by
+-- including key, then value in groups of two.
+-- @tparam k,v,... the arguments
+-- @usage Hash.of('a', 1, 'b', 2, 'c', 3)
 function Hash.of(...)
-	local r = Hash.EMPTY
+	local r = Hash.EMPTY:asMutable()
 	for i=1, select('#', ...), 2 do
 		local k, v = select(i, ...)
 		r = r:assoc(k, v)
 	end
+	r:asImmutable()
 	return r
 end
 
@@ -387,14 +388,23 @@ implements_node(CLeaf) -- }}}
 
 -- }}}
 
+--- @type Hash
+
+--- Returns the number of key-value pairs contained in the hashmap.
+-- @complexity O(1)
+-- @usage Hash.from({a = 1, b = 2}):len() == 2
 function Hash:len()
 	return self.count
 end
 mt.__len = Hash.len
 
+--- Returns a new hashmap such that `hmap:get(key) == val`
+-- @param key the key to set
+-- @param val the value to set
+-- @usage Vector.from({a = 1, b = 2}):assoc('a', 3):get('a') == 3
 function Hash:assoc(key, val)
 	local newRoot, isUpdate = self.root:assoc(0, hashcode(key), key, val)
-	if newRoot == self.root then 
+	if newRoot == self.root then
 		return self
 	end
 	local newCount = self.count + (isUpdate and 0 or 1)
@@ -403,29 +413,41 @@ function Hash:assoc(key, val)
 	return r
 end
 
+--- Gets a value by key. Keys behave as they do in lua tables.
+-- @param key the key
+-- @return the value, or `nil` if not found
+-- @usage Hash.from({a = 1, b = 2}):get('a') == 1
 function Hash:get(key)
 	local entry = self.root:find(hashcode(key), key)
 	return entry and entry.val
 end
 
+--- Returns a new hashmap without the value associated with the key.
+-- @param key the key to dissoc
+-- @usage Hash.from({a = 1, b = 2}):dissoc('a'):get('a') == nil
 function Hash:dissoc(key)
 	local hc = hashcode(key)
 	local newRoot = self.root:without(hc, key)
 	if newRoot == self.root then
-		assert(self.root:find(hc, key) == nil)
 		return self
 	elseif newRoot == nil then
 		return Hash.EMPTY
 	end
-	assert(newRoot:find(hc, key) == nil)
 	return Hmap {count = self.count - 1, root = newRoot}
 end
 
+--- Iterate through the hashmap, returning iter-key-value values. Both the
+-- value of iter, and the order of iterations are implementation-defined.
+-- @usage for _it, k, v in myhash:pairs() do print(k, v) end
 function Hash:ipairs()
 	return self.root:iter()
 end
 mt.__ipairs = Hash.ipairs
 
+--- Iterate through the hashmap, returning key-value pairs. This iterator
+-- hides the iteration table, but is more ergonomic to use with the naive
+-- for-loop.
+---- @usage for k, v in myhash:pairs() do print(k, v) end
 function Hash:pairs()
 	local gen, param, state = self.root:iter()
 	local function iter()
@@ -438,28 +460,42 @@ function Hash:pairs()
 end
 mt.__pairs = Hash.pairs
 
+function Hash:asMutable()
+	return copy({_mutate = {}}, self)
+end
+
+function Hash:asImmutable()
+	self._mutate = nil
+end
+
+--- Returns the result of passing `fn()` a transient copy of the current
+-- hashmap. A transient hashmap behaves like a normal hashmap where old copies
+-- of the hashmap are put into an undefined state after modification. Use it
+-- to create cheap batch modifications.
+-- @tparam function fn the function that performs the mutation
+-- @return A persistent hashmap with fn applied
 function Hash:withMutations(fn)
-	local mut = copy({_mutate = {}}, self)
+	local mut = self:asMutable()
 	local immut = fn(mut)
 	if immut then
-		immut._mutate = nil
+		immut:asImmutable()
 	end
 	return immut
 end
 
 Hash.EMPTY = Hmap {count = 0, root = {
-	assoc = function(self, shift, hash, key, val)
-		return LeafC(hash, key, val)
-	end,
-	without = function(self, hash, key)
-		return self
-	end,
-	find = function(...)
-		return nil
-	end,
-	iter = function(...)
-		return nil, nil, nil
-	end
+		assoc = function(self, shift, hash, key, val)
+			return LeafC(hash, key, val)
+		end,
+		without = function(self, hash, key)
+			return self
+		end,
+		find = function(...)
+			return nil
+		end,
+		iter = function(...)
+			return nil, nil, nil
+		end
 	}
 }
 

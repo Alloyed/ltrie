@@ -73,10 +73,11 @@ local EMPTY = Vec {
 -- @tparam iterator genparamstate the iterator
 -- @usage Vector.from(ipairs {1, 2, 3, 4})
 function Vector.from(...)
-	local r = EMPTY
+	local r = EMPTY:asMutable()
 	for _, v in ... do
 		r = r:conj(v)
 	end
+	r:asImmutable()
 	return r
 end
 
@@ -84,10 +85,11 @@ end
 -- @param ... the arguments to include
 -- @usage Vector.of(1, 2, 3, 4)
 function Vector.of(...)
-	local r =  EMPTY
+	local r = EMPTY:asMutable()
 	for i=1, select('#', ...) do
 		r = r:conj(select(i, ...))
 	end
+	r:asImmutable()
 	return r
 end
 
@@ -225,7 +227,7 @@ local function pushTail(self, level, parent, tailNode)
 	local r = copy(self, parent)
 
 	local nodeToInsert
-	if level == BITS then       -- is parent leaf?
+	if level == BITS then      -- is parent leaf?
 		nodeToInsert = tailNode
 	elseif parent[subidx] then -- does tailNode map to an existing child?
 		nodeToInsert = pushTail(self, level - BITS, parent[subidx], tailNode)
@@ -373,17 +375,24 @@ function Vector:pop()
 	return r
 end
 
+function Vector:asMutable()
+	return copy({_mutate = {}}, self)
+end
+
+function Vector:asImmutable()
+	self._mutate = nil
+end
 --- Returns the result of passing `fn()` a transient copy of the current
---  vector. A transient vector behaves like a normal vector where old copies
---  of the vector are put into an undefined state after modification. Use it
---  to create cheap batch modifications.
---  @tparam function fn the function that performs the mutation
---  @return A persistent vector with fn applied
+-- vector. A transient vector behaves like a normal vector where old copies
+-- of the vector are put into an undefined state after modification. Use it
+-- to create cheap batch modifications.
+-- @tparam function fn the function that performs the mutation
+-- @return A persistent vector with fn applied
 function Vector:withMutations(fn)
-	local mut = copy({_mutate = {}}, self)
+	local mut = self:asMutable()
 	local immut = fn(mut)
 	if immut then
-		immut._mutate = nil
+		immut:asImmutable()
 	end
 	return immut
 end

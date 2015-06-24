@@ -30,6 +30,11 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Hash">Class Hash </a></li>
+</ul>
 
 
 <h2>Modules</h2>
@@ -71,18 +76,300 @@
   can learn more about from the <a href="https://en.wikipedia.org/wiki/Hash_array_mapped_trie">Wikipedia article</a>.</p>
 
 
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Hash.from">Hash.from (genparamstate)</a></td>
+	<td class="summary">Creates a hashmap containing the key-value pairs provided by the given
+ iterator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash.of">Hash.of (the)</a></td>
+	<td class="summary">Creates a hashmap containing the arguments.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Hash">Class Hash </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Hash:len">Hash:len ()</a></td>
+	<td class="summary">Returns the number of key-value pairs contained in the hashmap.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash:assoc">Hash:assoc (key, val)</a></td>
+	<td class="summary">Returns a new hashmap such that <code>hmap:get(key) == val</code></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash:get">Hash:get (key)</a></td>
+	<td class="summary">Gets a value by key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash:dissoc">Hash:dissoc (key)</a></td>
+	<td class="summary">Returns a new hashmap without the value associated with the key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash:ipairs">Hash:ipairs ()</a></td>
+	<td class="summary">Iterate through the hashmap, returning iter-key-value values.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash:pairs">Hash:pairs ()</a></td>
+	<td class="summary">Iterate through the hashmap, returning key-value pairs.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Hash:withMutations">Hash:withMutations (fn)</a></td>
+	<td class="summary">Returns the result of passing <code>fn()</code> a transient copy of the current
+ hashmap.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Hash.from"></a>
+    <strong>Hash.from (genparamstate)</strong>
+    </dt>
+    <dd>
+    Creates a hashmap containing the key-value pairs provided by the given
+ iterator.  If keys are repeated then later pairs take precedence.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">genparamstate</span>
+            <span class="types"><span class="type">iterator</span></span>
+         the associative iterator. @see luafun.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Hash.from(<span class="global">pairs</span> {a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash.of"></a>
+    <strong>Hash.of (the)</strong>
+    </dt>
+    <dd>
+    Creates a hashmap containing the arguments.  pairs are specified by
+ including key, then value in groups of two.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">the</span>
+            <span class="types"><span class="type">k,v,...</span></span>
+         arguments
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Hash.of(<span class="string">'a'</span>, <span class="number">1</span>, <span class="string">'b'</span>, <span class="number">2</span>, <span class="string">'c'</span>, <span class="number">3</span>)</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Class_Hash"></a>Class Hash </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Hash:len"></a>
+    <strong>Hash:len ()</strong>
+    </dt>
+    <dd>
+    Returns the number of key-value pairs contained in the hashmap.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Hash.from({a = <span class="number">1</span>, b = <span class="number">2</span>}):len() == <span class="number">2</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash:assoc"></a>
+    <strong>Hash:assoc (key, val)</strong>
+    </dt>
+    <dd>
+    Returns a new hashmap such that <code>hmap:get(key) == val</code>
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+         the key to set
+        </li>
+        <li><span class="parameter">val</span>
+         the value to set
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.from({a = <span class="number">1</span>, b = <span class="number">2</span>}):assoc(<span class="string">'a'</span>, <span class="number">3</span>):get(<span class="string">'a'</span>) == <span class="number">3</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash:get"></a>
+    <strong>Hash:get (key)</strong>
+    </dt>
+    <dd>
+    Gets a value by key.  Keys behave as they do in lua tables.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+         the key
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the value, or <code>nil</code> if not found
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Hash.from({a = <span class="number">1</span>, b = <span class="number">2</span>}):get(<span class="string">'a'</span>) == <span class="number">1</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash:dissoc"></a>
+    <strong>Hash:dissoc (key)</strong>
+    </dt>
+    <dd>
+    Returns a new hashmap without the value associated with the key.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+         the key to dissoc
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Hash.from({a = <span class="number">1</span>, b = <span class="number">2</span>}):dissoc(<span class="string">'a'</span>):get(<span class="string">'a'</span>) == <span class="keyword">nil</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash:ipairs"></a>
+    <strong>Hash:ipairs ()</strong>
+    </dt>
+    <dd>
+    Iterate through the hashmap, returning iter-key-value values.  Both the
+ value of iter, and the order of iterations are implementation-defined.
+
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> _it, k, v <span class="keyword">in</span> myhash:<span class="global">pairs</span>() <span class="keyword">do</span> <span class="global">print</span>(k, v) <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash:pairs"></a>
+    <strong>Hash:pairs ()</strong>
+    </dt>
+    <dd>
+    Iterate through the hashmap, returning key-value pairs.  This iterator
+ hides the iteration table, but is more ergonomic to use with the naive
+ for-loop.
+
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> k, v <span class="keyword">in</span> myhash:<span class="global">pairs</span>() <span class="keyword">do</span> <span class="global">print</span>(k, v) <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Hash:withMutations"></a>
+    <strong>Hash:withMutations (fn)</strong>
+    </dt>
+    <dd>
+    Returns the result of passing <code>fn()</code> a transient copy of the current
+ hashmap.  A transient hashmap behaves like a normal hashmap where old copies
+ of the hashmap are put into an undefined state after modification. Use it
+ to create cheap batch modifications.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         the function that performs the mutation
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A persistent hashmap with fn applied
+    </ol>
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
-<i style="float:right;">Last updated 2015-06-24 05:13:36 </i>
+<i style="float:right;">Last updated 2015-06-24 14:50:45 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

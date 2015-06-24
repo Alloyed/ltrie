@@ -1,0 +1,21 @@
+dependencies:
+    pre:
+        - sudo apt-get update
+        - sudo apt-get install lua5.1 luarocks
+        - sudo luarocks install luasocket
+        - sudo luarocks install luasec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu
+        - sudo luarocks install busted
+        - sudo luarocks install luabitop
+        - sudo luarocks install ldoc
+    post:
+        - sudo luarocks make --server=http://luarocks.org/manifests/alloyed
+test:
+    override:
+        - mkdir -p $CIRCLE_TEST_REPORTS/junit
+        - busted -o junit > $CIRCLE_TEST_REPORTS/junit/tests.xml
+
+deployment:
+    master:
+        branch: master
+        commands:
+            - ./rebuild_docs.sh

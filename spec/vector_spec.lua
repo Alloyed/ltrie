@@ -4,30 +4,39 @@ global('file')
 
 describe("Persistent Vectors", function()
 	local Vector = require 'ltrie.vector'
-	local tbl = {}
+
+	local _tbl = {}
 	for i=1, 2048 do
-		table.insert(tbl, 2048 - i)
+		table.insert(_tbl, 2048 - i)
 	end
 
-	local vec
+	local _vec
 	it("implements from()", function()
-		vec = Vector.from(ipairs(tbl))
+		_vec = Vector.from(ipairs(_tbl))
+	end)
+
+	local vec, tbl, tl
+	before_each(function()
+		tbl = setmetatable({}, {__index = _tbl})
+		tl = #_tbl
+		vec = _vec
 	end)
 
 	it("implements get()", function()
-		for i, v in ipairs(tbl) do
+		for i, v in vec:ipairs() do
 			assert.are.equal(tbl[i], vec:get(i))
 		end
 	end)
 
 	it("implements len()", function()
-		assert.are.equal(#tbl, vec:len())
+		assert.are.equal(tl, vec:len())
 	end)
 
 	it("implements conj()", function()
 		local top = vec:len()
 		for _, v in ipairs {'a', 'b', 'c', 'd'} do
-			table.insert(tbl, v)
+			tl = tl + 1
+			tbl[tl] = v
 			vec = vec:conj(v)
 		end
 
@@ -48,7 +57,7 @@ describe("Persistent Vectors", function()
 			vec = vec:assoc(car, cdr)
 		end
 
-		for i, v in ipairs(tbl) do
+		for i, v in vec:ipairs() do
 			assert.are.equal(tbl[i], vec:get(i))
 		end
 	end)

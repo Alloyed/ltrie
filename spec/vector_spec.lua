@@ -1,6 +1,6 @@
-require 'spec/strict' ()
-global('bit32')
-global('file')
+-- require 'spec/strict' ()
+-- global('bit32')
+-- global('file')
 
 describe("Persistent Vectors", function()
 	local Vector = require 'ltrie.vector'
@@ -10,10 +10,7 @@ describe("Persistent Vectors", function()
 		table.insert(_tbl, 2048 - i)
 	end
 
-	local _vec
-	it("implements from()", function()
-		_vec = Vector.from(ipairs(_tbl))
-	end)
+	local _vec = Vector.from(ipairs(_tbl))
 
 	local vec, tbl, tl
 	before_each(function()
@@ -24,12 +21,12 @@ describe("Persistent Vectors", function()
 
 	it("implements get()", function()
 		for i, v in vec:ipairs() do
-			assert.are.equal(tbl[i], vec:get(i))
+			assert.equal(tbl[i], vec:get(i))
 		end
 	end)
 
 	it("implements len()", function()
-		assert.are.equal(tl, vec:len())
+		assert.equal(tl, vec:len())
 	end)
 
 	it("implements conj()", function()
@@ -41,7 +38,7 @@ describe("Persistent Vectors", function()
 		end
 
 		for i = top, vec:len() do
-			assert.are.equal(tbl[i], vec:get(i))
+			assert.equal(tbl[i], vec:get(i))
 		end
 	end)
 
@@ -58,7 +55,7 @@ describe("Persistent Vectors", function()
 		end
 
 		for i, v in vec:ipairs() do
-			assert.are.equal(tbl[i], vec:get(i))
+			assert.equal(tbl[i], vec:get(i))
 		end
 	end)
 
@@ -75,7 +72,71 @@ describe("Persistent Vectors", function()
 			return v:conj('c')
 		end)
 
+		assert.equal('c', v2:get(v2:len()))
 		assert.not_equal(v2:get(v2:len()), vec:get(vec:len()))
+	end)
+end)
+
+describe("Transient vectors", function()
+	local Vector = require 'ltrie.vector'
+
+	local _tbl = {}, _vec
+	for i=1, 2048 do
+		table.insert(_tbl, 2048 - i)
+	end
+	_vec = Vector.from(ipairs(_tbl))
+
+	local vec, tbl, tl
+	before_each(function()
+		tbl = setmetatable({}, {__index = _tbl})
+		tl = #_tbl
+		vec = _vec
+	end)
+
+	it("can conj()", function()
+		local add = { 'a', 'b', 'c', 'd', 'e' }
+		local e = vec:len()
+		local v2 = vec:withMutations(function(v)
+			for i, _v in ipairs(add) do
+				v = v:conj(_v)
+			end
+			return v
+		end)
+		for i, v in ipairs(add) do
+			assert.equal(v, v2:get(e + i))
+		end
+	end)
+
+	it("can assoc()", function()
+		local l = vec:len()
+		local mergeIn = {{l, "TOP"}}
+		for i=1, 100 do
+			table.insert(mergeIn, {math.random(l), "new#" .. i})
+		end
+		local v2 = vec:withMutations(function(v)
+			for _, val in ipairs(mergeIn) do
+				local car, cdr = unpack(val)
+				tbl[car] = cdr
+				v = v:assoc(car, cdr)
+			end
+			return v
+		end)
+
+		for _, pair in ipairs(mergeIn) do
+			local i, v = unpack(pair)
+			assert.equal(tbl[i], v2:get(i))
+			assert.not_equal(v2:get(i), vec:get(i))
+		end
+	end)
+
+	it("can pop()", function()
+		local v2 = vec:withMutations(function(v)
+			for i=1, 20 do
+				v:pop()
+			end
+			return v
+		end)
+		assert.equal(vec:len() - 20, v2:len())
 	end)
 end)
 
@@ -91,30 +152,30 @@ describe("subvec", function()
 
 	it("implements get()", function()
 		local sv = Subvec.new(vec, 1, 20)
-		assert.is.equal(sv:len(), 20)
+		assert.equal(sv:len(), 20)
 		for i=1, 20 do
-			assert.is.equal(sv:get(i), vec:get(i))
+			assert.equal(sv:get(i), vec:get(i))
 		end
 
 		sv = Subvec.new(vec, 21, 40)
 		for i=1, 20 do
-			assert.is.equal(sv:get(i), vec:get(i + 20))
+			assert.equal(sv:get(i), vec:get(i + 20))
 		end
 	end)
 
 	it("implements ipairs()", function()
 		local sv = Subvec.new(vec, 11, 20)
-		assert.is.equal(sv:len(), 10)
+		assert.equal(sv:len(), 10)
 		for i, v in sv:ipairs() do
-			assert.is.equal(v, vec:get(i+10))
+			assert.equal(v, vec:get(i+10))
 		end
 	end)
 
 	it("is iterable", function()
 		local sv = Subvec.new(vec, 11, 20)
-		assert.is.equal(sv:len(), 10)
+		assert.equal(sv:len(), 10)
 		fun.each(function(i, v)
-			assert.is.equal(v, vec:get(i+10))
+			assert.equal(v, vec:get(i+10))
 		end, fun.enumerate(sv))
 	end)
 
@@ -122,19 +183,19 @@ describe("subvec", function()
 		local sv = Subvec.new(vec, 1, 5)
 
 		sv = sv:conj('a')
-		assert.is.equal(sv:get(6), 'a')
-		assert.is_not.equal(vec:get(6), 'a')
+		assert.equal(sv:get(6), 'a')
+		assert.not_equal(vec:get(6), 'a')
 
 		sv = sv:assoc(2, 'b')
-		assert.is.equal(sv:get(2), 'b')
-		assert.is_not.equal(vec:get(2), 'b')
+		assert.equal(sv:get(2), 'b')
+		assert.not_equal(vec:get(2), 'b')
 	end)
 
 	it("implements pop()", function()
 		local sv = Subvec.new(vec, 1, 5)
-		assert.is.equal(sv:len(), 5)
+		assert.equal(sv:len(), 5)
 
 		sv = sv:pop()
-		assert.is.equal(sv:len(), 4)
+		assert.equal(sv:len(), 4)
 	end)
 end)

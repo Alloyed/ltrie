@@ -2,11 +2,11 @@ dependencies:
     pre:
         - sudo apt-get update
         - sudo apt-get install lua5.1 luarocks
-        - sudo luarocks install luasocket
-        - sudo luarocks install luasec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu
-        - sudo luarocks install busted
-        - sudo luarocks install luabitop
-        - sudo luarocks install ldoc
+        - ! luarocks show luasocket && sudo luarocks install luasocket || true
+        - ! luarocks show luasec && sudo luarocks install luasec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu || true
+        - ! luarocks show busted && sudo luarocks install busted || true
+        - ! luarocks show luabitop && sudo luarocks install luabitop || true
+        - ! luarocks show ldoc && sudo luarocks install ldoc || true
     post:
         - sudo luarocks make --server=http://luarocks.org/manifests/alloyed
 test:

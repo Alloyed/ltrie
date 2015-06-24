@@ -373,10 +373,18 @@ function Vector:pop()
 	return r
 end
 
+--- Returns the result of passing `fn()` a transient copy of the current
+--  vector. A transient vector behaves like a normal vector where old copies
+--  of the vector are put into an undefined state after modification. Use it
+--  to create cheap batch modifications.
+--  @tparam function fn the function that performs the mutation
+--  @return A persistent vector with fn applied
 function Vector:withMutations(fn)
 	local mut = copy({_mutate = {}}, self)
 	local immut = fn(mut)
-	immut._mutate = nil -- doesn't count~
+	if immut then
+		immut._mutate = nil
+	end
 	return immut
 end
 

@@ -124,12 +124,27 @@ function Node.create(shift, leaf, hash, key, val)
 	}:assoc (shift, hash, key, val)
 end
 
-local function copy(tbl)
+local function copy(owner, tbl)
+	assert(tbl ~= nil)
+	local set_dirty = false
+	if owner._mutate then
+		if tbl._mutate == owner._mutate then
+			return tbl
+		else
+			set_dirty = true
+		end
+	end
+
 	local t = {}
+	local mt = getmetatable(tbl)
 	for k, v in pairs(tbl) do
 		t[k] = v
 	end
-	return t
+
+	if set_dirty then
+		t._mutate = owner._mutate
+	end
+	return setmetatable(t, mt)
 end
 
 local LeafC
@@ -141,26 +156,29 @@ function Node:assoc(shift, hash, key, val)
 		if n == self.nodes[idx] then
 			return self, upd
 		else
-			local newNodes = copy(self.nodes)
+			local newNodes = copy(self, self.nodes)
 			newNodes[idx] = n
-			return NodeC {
-				bitmap = self.bitmap,
-				nodes  = newNodes,
-				shift  = shift
-			}, upd
+			local r = copy(self, self)
+
+			r.bitmap = self.bitmap
+			r.nodes = newNodes
+			r.shift = shift
+
+			return r, upd
 		end
 	else
-		local newNodes = copy(self.nodes)
+		local newNodes = copy(self, self.nodes)
 		-- Shift forward old nodes
 		for i=#self.nodes, idx, -1 do
 			newNodes[i+1] = newNodes[i]
 		end
 		newNodes[idx] = LeafC(hash, key, val)
-		return NodeC {
-			bitmap = b.bor(self.bitmap, bit),
-			nodes  = newNodes,
-			shift  = shift
-		}
+		local r = copy(self, self)
+		r.bitmap = b.bor(self.bitmap, bit)
+		r.nodes  = newNodes
+		r.shift  = shift
+
+		return r
 	end
 end
 
@@ -183,24 +201,23 @@ function Node:without(hash, key)
 		if self.bitmap == bit then
 			return nil
 		end
-		local newNodes = copy(self.nodes)
+		local newNodes = copy(self, self.nodes)
 		for i=idx, #self.nodes do
 			newNodes[i] = newNodes[i+1]
 		end
-		return NodeC {
-			bitmap = b.band(self.bitmap, b.bnot(bit)),
-			nodes = newNodes,
-			shift = self.shift
-		}
+		local r = copy(self, self)
+
+		r.bitmap = b.band(self.bitmap, b.bnot(bit))
+		r.nodes = newNodes
+
+		return r
 	end
 
-	local newNodes = copy(self.nodes)
+	local newNodes = copy(self, self.nodes)
 	newNodes[idx] = n
-	return NodeC {
-		bitmap = self.bitmap,
-		nodes = newNodes,
-		shift = self.shift
-	}
+	local r = copy(self, self)
+	r.nodes = newNodes
+	return r
 end
 
 function Node:find(hash, key)
@@ -298,7 +315,7 @@ function CLeaf:assoc(shift, hash, key, val)
 		if idx ~= -1 then
 			return self:assoc(shift, hash, key, val)
 		end
-		local newLeaves = copy(self.leaves)
+		local newLeaves = copy(self, self.leaves)
 		table.insert(newLeaves, LeafC(hash, key, val))
 		return CLeafC(hash, newLeaves)
 	end
@@ -320,7 +337,7 @@ function CLeaf:without(hash, key)
 		end
 	end
 
-	local newLeaves = copy(self.leaves)
+	local newLeaves = copy(self, self.leaves)
 	for i=idx, len do
 		newLeaves[i] = newLeaves[i + 1]
 	end
@@ -420,6 +437,15 @@ function Hash:pairs()
 	return iter, param, state
 end
 mt.__pairs = Hash.pairs
+
+function Hash:withMutations(fn)
+	local mut = copy({_mutate = {}}, self)
+	local immut = fn(mut)
+	if immut then
+		immut._mutate = nil
+	end
+	return immut
+end
 
 Hash.EMPTY = Hmap {count = 0, root = {
 	assoc = function(self, shift, hash, key, val)

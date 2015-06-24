@@ -54,6 +54,19 @@ describe("Persistent Vectors", function()
 	end)
 
 	it("implements pop()", function()
+		local l = vec:len()
+		assert.not_nil(vec:get(l))
+		local v2 = vec:pop()
+		assert.is_nil(v2:get(l))
+		assert.equal(l - 1, v2:len())
+	end)
+
+	it("implements withMutations()", function()
+		local v2 = vec:withMutations(function(v)
+			return v:conj('c')
+		end)
+
+		assert.not_equal(v2:get(v2:len()), vec:get(vec:len()))
 	end)
 end)
 

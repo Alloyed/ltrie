@@ -62,15 +62,6 @@ local function Vec(data)
 	return setmetatable(data, mt)
 end
 
-local function VecW(self, data)
-	for k, v in pairs(self) do
-		if not data[k] then
-			data[k] = v
-		end
-	end
-	return Vec(data)
-end
-
 local EMPTY = Vec {
 	count = 0,
 	shift = BITS,
@@ -207,13 +198,31 @@ local function newPath(level, node)
 	return r
 end
 
-local function copy(tbl)
-	return {unpack(tbl)}
+local function copy(owner, tbl)
+	local set_dirty = false
+	if owner._mutate then
+		if tbl._mutate == owner._mutate then
+			return tbl
+		else
+			set_dirty = true
+		end
+	end
+
+	local t = {}
+	local mt = getmetatable(tbl)
+	for k, v in pairs(tbl) do
+		t[k] = v
+	end
+
+	if set_dirty then
+		t._mutate = owner._mutate
+	end
+	return setmetatable(t, mt)
 end
 
 local function pushTail(self, level, parent, tailNode)
 	local subidx = mask(b.rshift(self.count - 1, level)) + 1 -- +1
-	local r = copy(parent)
+	local r = copy(self, parent)
 
 	local nodeToInsert
 	if level == BITS then       -- is parent leaf?
@@ -236,16 +245,19 @@ function Vector:conj(val)
 	local idx = self.count
 	-- Is there room in the tail?
 	if self.count - tailoff(self) < WIDTH then
-		local newTail = copy(self.tail)
+		local newTail = copy(self, self.tail)
 		table.insert(newTail, val)
-		return VecW(self, {
-			count = self.count + 1,
-			tail = newTail
-		})
+
+		local r = copy(self, self)
+
+		r.count = self.count + 1
+		r.tail = newTail
+
+		return r
 	end
 
 	local newRoot
-	local tailNode = copy(self.tail)
+	local tailNode = copy(self, self.tail)
 	local newShift = self.shift
 
 	-- will root overflow?
@@ -258,21 +270,23 @@ function Vector:conj(val)
 		newRoot = pushTail(self, self.shift, self.root, tailNode)
 	end
 
-	return VecW(self, {
-		count = self.count + 1,
-		shift = newShift,
-		root = newRoot,
-		tail = {val}
-	})
+	local r = copy(self, self)
+
+	r.count = self.count + 1
+	r.shift = newShift
+	r.root  = newRoot
+	r.tail  = {val}
+
+	return r
 end
 
-local function doAssoc(level, node, idx, val)
-	local r = copy(node)
+local function doAssoc(self, level, node, idx, val)
+	local r = copy(self, node)
 	if level == 0 then
 		r[mask(idx) + 1] = val -- +1
 	else
 		local subidx = mask(b.rshift(idx, level)) + 1 -- +1
-		r[subidx] = doAssoc(level - BITS, node[subidx], idx, val)
+		r[subidx] = doAssoc(self, level - BITS, node[subidx], idx, val)
 	end
 	return r
 end
@@ -291,15 +305,16 @@ function Vector:assoc(idx, val)
 		error("Index out of bounds")
 	end
 	if idx >= tailoff(self) then
-		local newTail = copy(self.tail)
+		local newTail = copy(self, self.tail)
 		newTail[mask(idx) + 1] = val -- +1
-		return VecW(self, {
-			tail = newTail
-		})
+		local r = copy(self, self)
+		r.tail = newTail
+		return r
 	end
-	return VecW(self, {
-		root = doAssoc(self.shift, self.root, idx, val),
-	})
+	local r = copy(self, self)
+	r.root = doAssoc(self, self.shift, self.root, idx, val)
+
+	return r
 end
 
 local function popTail(level, node)
@@ -309,14 +324,14 @@ local function popTail(level, node)
 		if newChild == nil and subidx == 1 then
 			return nil
 		else
-			local r = copy(node)
+			local r = copy(self, node)
 			r[subidx] = newChild
 			return r
 		end
 	elseif subidx == 1 then
 		return nil
 	else
-		local r = copy(node)
+		local r = copy(self, node)
 		r[subidx] = nil
 		return r
 	end
@@ -331,12 +346,13 @@ function Vector:pop()
 	elseif self.count == 1 then
 		return EMPTY
 	elseif self.count - tailoff(self) > 1 then
-		local newTail = copy(self.tail)
+		local newTail = copy(self, self.tail)
 		table.remove(newTail)
-		return VecW(self, {
-			count = self.count - 1,
-			tail  = newTail
-		})
+		local r = copy(self, self)
+		r.count = self.count - 1
+		r.tail = newTail
+
+		return r
 	end
 
 	local newTail = arrayFor(self, self.count - 2)
@@ -349,12 +365,19 @@ function Vector:pop()
 		newShift = newShift - 1
 	end
 
-	return Vec {
-		count = self.count - 1,
-		shift = newShift,
-		root  = newRoot,
-		tail  = newTail
-	}
+	local r = copy(self,self)
+	r.count = self.count - 1
+	r.shift = newShift
+	r.root  = newRoot
+	r.tail  = newTail
+	return r
+end
+
+function Vector:withMutations(fn)
+	local mut = copy({_mutate = {}}, self)
+	local immut = fn(mut)
+	immut._mutate = nil -- doesn't count~
+	return immut
 end
 
 return Vector

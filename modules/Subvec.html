@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>LTrie</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ltrie</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="../modules/Hashmap.html">Hashmap</a></li>
+  <li><a href="../modules/List.html">List</a></li>
+  <li><strong>Subvec</strong></li>
+  <li><a href="../modules/Vector.html">Vector</a></li>
+  <li><a href="../modules/tablemap.html">tablemap</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Subvec</code></h1>
+<p>A subsequence of a vector.</p>
+<p> Subvecs can only be constructing from an
+ existing, non-transient vector or subvec, and otherwise support everything
+ a normal vector would.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#new">new (vec, vecStart, vecEnd)</a></td>
+	<td class="summary">Creates a new subvector <code>s</code> containing the elements from <code>vec</code> within the
+  range <code>[vecStart, vecEnd]</code> such that <code>s:get(1) == vec:get(vecStart)</code> and
+  <code>s:get(s:len()) == vec:get(vecEnd)</code></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#len">len ()</a></td>
+	<td class="summary">Returns the number of elements in the subvector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get">get (idx)</a></td>
+	<td class="summary">Get a value by index.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#assoc">assoc (idx, val)</a></td>
+	<td class="summary">Returns a new subvector such that <code>sv:get(idx) == val</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#conj">conj (val)</a></td>
+	<td class="summary">Returns a new subvector with val appended to the end.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#pop">pop ()</a></td>
+	<td class="summary">Returns a new vector with the last value removed.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "new"></a>
+    <strong>new (vec, vecStart, vecEnd)</strong>
+    </dt>
+    <dd>
+    Creates a new subvector <code>s</code> containing the elements from <code>vec</code> within the
+  range <code>[vecStart, vecEnd]</code> such that <code>s:get(1) == vec:get(vecStart)</code> and
+  <code>s:get(s:len()) == vec:get(vecEnd)</code>
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">vec</span>
+         the vector
+        </li>
+        <li><span class="parameter">vecStart</span>
+         the start index of the subvector, inclusive
+        </li>
+        <li><span class="parameter">vecEnd</span>
+         the end index of the vector, inclusive
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">sv = Subvec.new(Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>), <span class="number">2</span>, <span class="number">4</span>) -- [<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "len"></a>
+    <strong>len ()</strong>
+    </dt>
+    <dd>
+    Returns the number of elements in the subvector.
+  In lua 5.2 and up, <code>#subvec</code> can be used as a shortcut.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">sv:len() == <span class="number">3</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "get"></a>
+    <strong>get (idx)</strong>
+    </dt>
+    <dd>
+    Get a value by index.  Vector indexes start at one.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(log32 n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">int</span></span>
+         the index
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the value, or <code>nil</code> if not found
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">sv:get(<span class="number">2</span>) == <span class="number">3</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "assoc"></a>
+    <strong>assoc (idx, val)</strong>
+    </dt>
+    <dd>
+    Returns a new subvector such that <code>sv:get(idx) == val</code>.  This creates a new
+  parent vector to represent the modification.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(log32 n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">int</span></span>
+         the index to set
+        </li>
+        <li><span class="parameter">val</span>
+         the value to set
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>):assoc(<span class="number">2</span>, <span class="string">'a'</span>) == Vector.of(<span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "conj"></a>
+    <strong>conj (val)</strong>
+    </dt>
+    <dd>
+    Returns a new subvector with val appended to the end.  This creates a new
+  parent vector to represent the modification.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(log32 n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">val</span>
+         the value to append
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">sv:conj(<span class="number">5</span>) == Subvec.new(Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>), <span class="number">2</span>, <span class="number">5</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "pop"></a>
+    <strong>pop ()</strong>
+    </dt>
+    <dd>
+    Returns a new vector with the last value removed.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):pop() == Vector.of(<span class="number">1</span>, <span class="number">2</span>)</pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
+<i style="float:right;">Last updated 2015-06-24 00:33:37 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

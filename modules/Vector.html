@@ -1,0 +1,393 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>LTrie</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ltrie</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Vector">Class Vector </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="../modules/Hashmap.html">Hashmap</a></li>
+  <li><a href="../modules/List.html">List</a></li>
+  <li><a href="../modules/Subvec.html">Subvec</a></li>
+  <li><strong>Vector</strong></li>
+  <li><a href="../modules/tablemap.html">tablemap</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Vector</code></h1>
+<p>An immutable vector datatype, modeled after Clojure's PersistentVector.</p>
+<p>  It can be used to store sequential data, much like Lua tables:</p>
+
+
+<pre>
+<span class="keyword">local</span> my_vector = Vector.from(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)
+<span class="global">print</span>(my_vector:get(<span class="number">2</span>)) <span class="comment">-- 'c'
+</span>
+</pre>
+
+<p>  But because they are persistent, modifications create a new vector instead
+  of changing the old one:</p>
+
+
+<pre>
+<span class="keyword">local</span> my_new_vector = my_vector:set(<span class="number">2</span>, <span class="string">'d'</span>)
+<span class="global">print</span>(my_new_vector:get(<span class="number">2</span>)) <span class="comment">-- 'd'
+</span><span class="global">print</span>(my_vector:get(<span class="number">2</span>))     <span class="comment">-- still 'c'
+</span>
+</pre>
+
+<p>  Vectors are dense, ordered, and indexed-by-one, meaning a vector will never
+  have an element whose index doesn't fall in between <code>[1 .. v:len()]</code>.</p>
+
+<p>  <code>nil</code> is a valid element, however, so a vector like:</p>
+
+
+<pre>
+Vector.of(<span class="number">1</span>, <span class="keyword">nil</span>, <span class="keyword">nil</span>, <span class="number">4</span>)
+</pre>
+
+<p>  has a size of four, and iterating through it
+  will include the nil values.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#from">from (genparamstate)</a></td>
+	<td class="summary">Creates a vector containing the elements provided by the given iterator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#of">of (...)</a></td>
+	<td class="summary">Creates a vector containing the arguments.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_vector">is_vector (o)</a></td>
+	<td class="summary">Checks to see if given object is a vector.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Vector">Class Vector </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Vector:len">Vector:len ()</a></td>
+	<td class="summary">Returns the number of elements contained in the vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector:get">Vector:get (idx)</a></td>
+	<td class="summary">Get a value by index.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector:ipairs">Vector:ipairs ()</a></td>
+	<td class="summary">Iterate through the vector, from beginning to end.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector:conj">Vector:conj (val)</a></td>
+	<td class="summary">Returns a new vector with val appended to the end.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector:assoc">Vector:assoc (idx, val)</a></td>
+	<td class="summary">Returns a new vector such that <code>vector:get(idx) == val</code></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector:pop">Vector:pop ()</a></td>
+	<td class="summary">Returns a new vector with the last value removed.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "from"></a>
+    <strong>from (genparamstate)</strong>
+    </dt>
+    <dd>
+    Creates a vector containing the elements provided by the given iterator.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">genparamstate</span>
+            <span class="types"><span class="type">iterator</span></span>
+         the iterator
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.from(<span class="global">ipairs</span> {<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "of"></a>
+    <strong>of (...)</strong>
+    </dt>
+    <dd>
+    Creates a vector containing the arguments.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         the arguments to include
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "is_vector"></a>
+    <strong>is_vector (o)</strong>
+    </dt>
+    <dd>
+    Checks to see if given object is a vector.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">o</span>
+         anything
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        <code>true</code> if List, false if not
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Class_Vector"></a>Class Vector </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Vector:len"></a>
+    <strong>Vector:len ()</strong>
+    </dt>
+    <dd>
+    Returns the number of elements contained in the vector.
+ In lua 5.2 and up, <code>#vector</code> can be used as a shortcut.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):len() == <span class="number">3</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Vector:get"></a>
+    <strong>Vector:get (idx)</strong>
+    </dt>
+    <dd>
+    Get a value by index.  Vector indexes start at one.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(log32 n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">int</span></span>
+         the index
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the value, or <code>nil</code> if not found
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):get(<span class="number">1</span>) == <span class="number">1</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Vector:ipairs"></a>
+    <strong>Vector:ipairs ()</strong>
+    </dt>
+    <dd>
+    Iterate through the vector, from beginning to end. </p>
+
+<p> Note that instead of returning <code>index, value</code> per iteration like normal
+ <code>ipairs()</code>, the value of <code>index</code> is implementation-defined.
+
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> _it, v <span class="keyword">in</span> my_vector:<span class="global">ipairs</span>() <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Vector:conj"></a>
+    <strong>Vector:conj (val)</strong>
+    </dt>
+    <dd>
+    Returns a new vector with val appended to the end.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">val</span>
+         the value to append
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">1</span>, <span class="number">2</span>):conj(<span class="number">3</span>) == Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Vector:assoc"></a>
+    <strong>Vector:assoc (idx, val)</strong>
+    </dt>
+    <dd>
+    Returns a new vector such that <code>vector:get(idx) == val</code>
+
+    <h3>complexity:</h3>
+    <ul>
+         O(log32 n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">int</span></span>
+         the index to set
+        </li>
+        <li><span class="parameter">val</span>
+         the value to set
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>):assoc(<span class="number">2</span>, <span class="string">'a'</span>) == Vector.of(<span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Vector:pop"></a>
+    <strong>Vector:pop ()</strong>
+    </dt>
+    <dd>
+    Returns a new vector with the last value removed.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">Vector.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):pop() == Vector.of(<span class="number">1</span>, <span class="number">2</span>)</pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
+<i style="float:right;">Last updated 2015-06-24 00:33:37 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

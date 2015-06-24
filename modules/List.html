@@ -1,0 +1,363 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>LTrie</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ltrie</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_List">Class List </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><a href="../modules/Hashmap.html">Hashmap</a></li>
+  <li><strong>List</strong></li>
+  <li><a href="../modules/Subvec.html">Subvec</a></li>
+  <li><a href="../modules/Vector.html">Vector</a></li>
+  <li><a href="../modules/tablemap.html">tablemap</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>List</code></h1>
+<p>A naive singly linked list, similar to lisp lists.</p>
+<p>  Like Vector, they are dense, ordered, begin at one, and (at least in this
+  implementation) are immutable.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#from">from (...)</a></td>
+	<td class="summary">Creates a list containing the values provided by the given iterable object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#of">of (...)</a></td>
+	<td class="summary">Creates a list containing the arguments.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_list">is_list (o)</a></td>
+	<td class="summary">Check to see if the given object is a list</td>
+	</tr>
+</table>
+<h2><a href="#Class_List">Class List </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#List:len">List:len ()</a></td>
+	<td class="summary">Returns the number of values contained by the list.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#List:ipairs">List:ipairs ()</a></td>
+	<td class="summary">Iterate through the list, from beginning to end.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#List:conj">List:conj (val)</a></td>
+	<td class="summary">Returns a new list with the value added to the beginning.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#List:pop">List:pop ()</a></td>
+	<td class="summary">Returns a new list with the first value removed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#List:assoc">List:assoc (idx, val)</a></td>
+	<td class="summary">Returns a new list with the value at index <code>idx</code> replaced with <code>val</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#List:get">List:get (idx)</a></td>
+	<td class="summary">Returns the value at index <code>idx</code>.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "from"></a>
+    <strong>from (...)</strong>
+    </dt>
+    <dd>
+    Creates a list containing the values provided by the given iterable object.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+            <span class="types"><span class="type">iterable</span></span>
+         a luafun iterable.
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.from({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "of"></a>
+    <strong>of (...)</strong>
+    </dt>
+    <dd>
+    Creates a list containing the arguments.
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         the values to include
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "is_list"></a>
+    <strong>is_list (o)</strong>
+    </dt>
+    <dd>
+    Check to see if the given object is a list
+
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">o</span>
+         anything
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        true if List, false if not
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Class_List"></a>Class List </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "List:len"></a>
+    <strong>List:len ()</strong>
+    </dt>
+    <dd>
+    Returns the number of values contained by the list.
+ In lua 5.2 and up, <code>#list</code> can be used as a shortcut.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(n)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):len() == <span class="number">3</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "List:ipairs"></a>
+    <strong>List:ipairs ()</strong>
+    </dt>
+    <dd>
+    Iterate through the list, from beginning to end. </p>
+
+<p> Note that instead of returning <code>index, value</code> per iteration like normal
+ <code>ipairs()</code>, the value of <code>index</code> is implementation-defined.
+
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">for</span> _it, v <span class="keyword">in</span> my_list:<span class="global">ipairs</span>() <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "List:conj"></a>
+    <strong>List:conj (val)</strong>
+    </dt>
+    <dd>
+    Returns a new list with the value added to the beginning.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">val</span>
+         the value to add
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.of(<span class="number">2</span>, <span class="number">3</span>):conj(<span class="number">1</span>) == List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "List:pop"></a>
+    <strong>List:pop ()</strong>
+    </dt>
+    <dd>
+    Returns a new list with the first value removed.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(1)
+    </ul>
+
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):pop() == List.of(<span class="number">2</span>, <span class="number">3</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "List:assoc"></a>
+    <strong>List:assoc (idx, val)</strong>
+    </dt>
+    <dd>
+    Returns a new list with the value at index <code>idx</code> replaced with <code>val</code>.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">int</span></span>
+         the index
+        </li>
+        <li><span class="parameter">val</span>
+         the value
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.of(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>):assoc(<span class="number">2</span>, <span class="string">'a'</span>) == List.of(<span class="number">0</span>, <span class="string">'a'</span>, <span class="number">0</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "List:get"></a>
+    <strong>List:get (idx)</strong>
+    </dt>
+    <dd>
+    Returns the value at index <code>idx</code>.
+
+    <h3>complexity:</h3>
+    <ul>
+         O(n)
+    </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">idx</span>
+            <span class="types"><span class="type">int</span></span>
+         the index
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the value, or <code>nil</code> if not found.
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>):get(<span class="number">2</span>) == <span class="number">2</span></pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
+<i style="float:right;">Last updated 2015-06-24 00:33:37 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

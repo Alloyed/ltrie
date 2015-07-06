@@ -58,7 +58,7 @@ end
 
 --- Creates a hashmap containing the arguments. pairs are specified by
 -- including key, then value in groups of two.
--- @tparam k,v,... the arguments
+-- @param k,v,... the arguments
 -- @usage Hash.of('a', 1, 'b', 2, 'c', 3)
 function Hash.of(...)
 	local r = Hash.EMPTY:asMutable()

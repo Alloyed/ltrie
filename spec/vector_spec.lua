@@ -1,6 +1,7 @@
--- require 'spec/strict' ()
--- global('bit32')
--- global('file')
+require 'spec/strict' ()
+global 'bit32'
+global 'file'
+global 'level'
 
 describe("Persistent Vectors", function()
 	local Vector = require 'ltrie.vector'

@@ -1,3 +1,4 @@
 *.so
 *.rock
+*.out
 doc/

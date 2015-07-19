@@ -2,6 +2,7 @@ require 'spec/strict' ()
 
 global 'bit32'
 global 'file'
+global 'level'
 
 describe("Basic", function()
 	local fun = require 'ltrie.fun'

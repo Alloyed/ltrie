@@ -243,7 +243,7 @@ local function node_iter(self, state)
 	local inner_state, k, v = state.gen(state.param, state.state)
 	state.state = inner_state
 	if inner_state == nil then
-		return nested_iter(self, inner_state)
+		return node_iter(self, state)
 	end
 
 	return state, k, v
@@ -365,7 +365,7 @@ local function nested_iter(self, state)
 	local inner_state, k, v = state.gen(state.param, state.state)
 	state.state = inner_state
 	if inner_state == nil then
-		return nested_iter(self, inner_state)
+		return nested_iter(self, state)
 	end
 
 	return state, k, v

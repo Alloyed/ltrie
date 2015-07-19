@@ -21,5 +21,6 @@ build = {
       ['ltrie.vector']   = "ltrie/vector.lua",
       ['ltrie.fun']      = "ltrie/fun.lua",
       ['ltrie.tablemap'] = "ltrie/tablemap.lua",
+	  ['ltrie.hashmap']  = "ltrie/hashmap.lua"
    }
 }

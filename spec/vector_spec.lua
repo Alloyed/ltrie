@@ -81,11 +81,11 @@ end)
 describe("Transient vectors", function()
 	local Vector = require 'ltrie.vector'
 
-	local _tbl = {}, _vec
+	local _tbl = {}
 	for i=1, 2048 do
 		table.insert(_tbl, 2048 - i)
 	end
-	_vec = Vector.from(ipairs(_tbl))
+	local _vec = Vector.from(ipairs(_tbl))
 
 	local vec, tbl, tl
 	before_each(function()

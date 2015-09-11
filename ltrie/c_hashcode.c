@@ -129,7 +129,7 @@ static const struct luaL_Reg tbl [] = {
 	{NULL, NULL}
 };
 
-int luaopen_hashcode(lua_State* L)
+int luaopen_ltrie_c_hashcode(lua_State* L)
 {
 	lua_newtable(L);
 	setfuncs(L, tbl, 0);

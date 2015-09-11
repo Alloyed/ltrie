@@ -32,7 +32,7 @@ local function try(...)
 end
 local fun = require 'ltrie.fun'
 local b = bit32 or try(require, 'bit') or error("No bitop lib found")
-local hashcode = require 'hashcode'.hashcode
+local hashcode = require 'ltrie.c_hashcode'.hashcode
 
 local Hash = {}
 local mt = { __index = Hash }
@@ -447,7 +447,7 @@ mt.__ipairs = Hash.ipairs
 --- Iterate through the hashmap, returning key-value pairs. This iterator
 -- hides the iteration table, but is more ergonomic to use with the naive
 -- for-loop.
----- @usage for k, v in myhash:pairs() do print(k, v) end
+-- @usage for k, v in myhash:pairs() do print(k, v) end
 function Hash:pairs()
 	local gen, param, state = self.root:iter()
 	local function iter()
@@ -459,6 +459,18 @@ function Hash:pairs()
 	return iter, param, state
 end
 mt.__pairs = Hash.pairs
+
+--- Constructs a read-only view of the current Hashmap, supporting the
+-- tradititional table interface using metatables. Use sparingly, this function
+-- produces 2 tables and 3 closures per-call.
+-- @usage print(Hash.from({foo = "bar"}):asTable().foo) -- "bar"
+function Hash:asTable()
+	return setmetatable({}, {
+		__newindex = function() error("Read-only table") end,
+		__index = function(_, k) return self:get(k) end,
+		__pairs = function() return self:pairs() end,
+	})
+end
 
 function Hash:asMutable()
 	return copy({_mutate = {}}, self)

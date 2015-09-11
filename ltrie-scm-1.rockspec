@@ -13,8 +13,8 @@ dependencies = {}
 build = {
    type = "builtin",
    modules = {
-      hashcode = {
-         sources = "ltrie/hashcode.c"
+      ['ltrie.c_hashcode'] = {
+         sources = "ltrie/c_hashcode.c"
       },
       ['ltrie.list']     = "ltrie/list.lua",
       ['ltrie.subvec']   = "ltrie/subvec.lua",

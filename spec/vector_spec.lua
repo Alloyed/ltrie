@@ -156,6 +156,17 @@ describe("subvec", function()
 		vec = vec:conj(i)
 	end
 
+	it("implements len()", function()
+		local sv = Subvec.new(vec, 1, 2)
+		assert.equal(sv:len(), 2)
+
+		local sv = Subvec.new(vec, 2, 2)
+		assert.equal(sv:len(), 1)
+
+		local sv = Subvec.new(vec, 2, 50)
+		assert.equal(sv:len(), 49)
+	end)
+
 	it("implements get()", function()
 		local sv = Subvec.new(vec, 1, 20)
 		assert.equal(sv:len(), 20)

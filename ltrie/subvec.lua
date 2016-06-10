@@ -41,6 +41,7 @@ end
 function Subvec:len()
 	return self.vecEnd - self.vecStart + 1
 end
+mt.__len = Subvec.len
 
 --- Get a value by index. Vector indexes start at one.
 --

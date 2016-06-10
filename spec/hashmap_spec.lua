@@ -172,7 +172,7 @@ describe("large hashmaps", function()
 	it("can be iterated over", function()
 		local t = make_hmap()
 		local checkboxes = {}
-		for _it, k, v in t:ipairs() do
+		for _it, k, v in t:iter() do
 			assert.equal(k, tostring(v))
 			checkboxes[v] = v
 		end

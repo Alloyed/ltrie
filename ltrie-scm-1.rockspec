@@ -16,11 +16,12 @@ build = {
       ['ltrie.c_hashcode'] = {
          sources = "ltrie/c_hashcode.c"
       },
-      ['ltrie.list']     = "ltrie/list.lua",
-      ['ltrie.subvec']   = "ltrie/subvec.lua",
-      ['ltrie.vector']   = "ltrie/vector.lua",
-      ['ltrie.fun']      = "ltrie/fun.lua",
-      ['ltrie.tablemap'] = "ltrie/tablemap.lua",
-	  ['ltrie.hashmap']  = "ltrie/hashmap.lua"
+      ['ltrie.hashcode']     = "ltrie/lua_hashcode.lua",
+      ['ltrie.list']         = "ltrie/list.lua",
+      ['ltrie.subvec']       = "ltrie/subvec.lua",
+      ['ltrie.vector']       = "ltrie/vector.lua",
+      ['ltrie.fun']          = "ltrie/fun.lua",
+      ['ltrie.tablemap']     = "ltrie/tablemap.lua",
+	  ['ltrie.hashmap']      = "ltrie/hashmap.lua"
    }
 }

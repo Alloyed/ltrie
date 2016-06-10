@@ -42,7 +42,7 @@ local function try(...)
 	if not ok then return nil end
 	return err
 end
-local b = bit32 or try(require, 'bit') or error("No bitop lib found")
+local b = try(require, 'bit32') or try(require, 'bit') or error("No bitop lib found")
 
 local BITS  = 5
 local WIDTH = 32
@@ -182,7 +182,7 @@ mt.__ipairs = Vector.ipairs
 function Vector:unpack()
 	local l = self:len()
 	local function loop(i)
-		if i >= len then
+		if i >= l then
 			return self:get(i)
 		end
 		return self:get(i), loop(i+1)

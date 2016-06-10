@@ -1,3 +1,6 @@
+--
+-- A pure lua implementation of a hashcode.
+--
 local function try(...)
 	local ok, err = pcall(...)
 	if not ok then return nil end
@@ -30,6 +33,10 @@ local function hashcode(o)
 		return h
 	elseif t == 'bool' then
 		return t and 1 or 2
+	elseif t == 'table' and o.hashcode then
+		local n = o:hashcode()
+		assert(math.floor(n) == n, "hashcode is not an integer")
+		return n
 	end
 
 	return nil

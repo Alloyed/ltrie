@@ -24,6 +24,10 @@
 -- For my own sanity, I used <http://git.io/vJeZx> as my model.
 -- To match Lua's index-by-one semantics I had to introduce an offset or two.
 -- Every line I've done that on is marked with a +1 or -1 comment.
+-- TODO
+-- * Take a closer look at immutable.js and its blamelog
+-- * Implement merges
+-- * store locals for PUC Lua improvements
 
 local function try(...)
 	local ok, err = pcall(...)
@@ -31,8 +35,8 @@ local function try(...)
 	return err
 end
 local fun = require 'ltrie.fun'
-local b = bit32 or try(require, 'bit') or error("No bitop lib found")
-local hashcode = require 'ltrie.c_hashcode'.hashcode
+local b = try(require, 'bit32') or try(require, 'bit') or error("No bitop lib found")
+local hashcode = require 'ltrie.hashcode'.hashcode
 
 local Hash = {}
 local mt = { __index = Hash }
@@ -438,11 +442,11 @@ end
 
 --- Iterate through the hashmap, returning iter-key-value values. Both the
 -- value of iter, and the order of iterations are implementation-defined.
--- @usage for _it, k, v in myhash:pairs() do print(k, v) end
-function Hash:ipairs()
+-- @usage for _it, k, v in myhash:iter() do print(k, v) end
+function Hash:iter()
 	return self.root:iter()
 end
-mt.__ipairs = Hash.ipairs
+mt.__ipairs = Hash.iter
 
 --- Iterate through the hashmap, returning key-value pairs. This iterator
 -- hides the iteration table, but is more ergonomic to use with the naive

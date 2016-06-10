@@ -76,6 +76,11 @@ describe("Persistent Vectors", function()
 		assert.equal('c', v2:get(v2:len()))
 		assert.not_equal(v2:get(v2:len()), vec:get(vec:len()))
 	end)
+
+	it("implements unpack()", function()
+		local v = Vector.of(3, 2, 1)
+		assert.same({v:unpack()}, {3, 2, 1})
+	end)
 end)
 
 describe("Transient vectors", function()

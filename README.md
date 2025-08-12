@@ -1,3 +1,6 @@
+# WARNING
+this package is archived. a non-archived copy is available at [https://codeberg.org/alloyed/ltrie](https://codeberg.org/alloyed/ltrie)
+
 # Ltrie
 
 Ltrie is a collection of immutable datastructures patterned after
